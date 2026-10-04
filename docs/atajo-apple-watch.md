@@ -22,7 +22,7 @@ En la lista de apps que usan iCloud, comprueba que **Atajos** está activado.
 Abre **Atajos** → pestaña Atajos → **+**. Ponle de nombre «Speckweg kcal» y añade estas acciones en orden:
 
 1. **Buscar muestras de salud**
-   - Toca «Tipo» y elige **Energía activa**.
+   - Toca «Tipo» y elige **Energía en actividad**.
    - Añade el filtro **Fecha de inicio** · **está en los últimos** · **2 días**.
    - Ordenar por **Fecha de inicio**, sin límite.
 2. **Repetir con cada** elemento de «Muestras de salud».
