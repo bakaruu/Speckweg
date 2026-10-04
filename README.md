@@ -2,6 +2,28 @@
 
 App de escritorio para Windows para llevar el control de lo que comes (calorías y macros) junto con tus entrenos de [Hevy](https://www.hevyapp.com/), y recomendarte qué comer durante la semana. Todo se guarda en local; no hace falta servidor.
 
+## Instalar la app (sin programar)
+
+1. Ve a [Releases](https://github.com/bakaruu/Speckweg/releases/latest) y descarga **`Speckweg_x.y.z_x64-setup.exe`**.
+2. Ábrelo y sigue el asistente. No pide permisos de administrador.
+3. Windows puede mostrar "Windows protegió su PC" porque la app no está firmada: pulsa **Más información** y luego **Ejecutar de todas formas**.
+4. Abre **Speckweg** desde el menú Inicio o el acceso directo del escritorio.
+
+Para actualizar, descarga la versión nueva e instálala encima; tus datos se conservan.
+
+Tus datos (base de datos y ajustes) se guardan en `%APPDATA%\com.bakaruu.speckweg`.
+
+### Publicar una versión nueva
+
+Sube el número de versión en `src-tauri/tauri.conf.json` y en `package.json`, y luego:
+
+```powershell
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+GitHub Actions compila el instalador y crea la Release sola. También se puede lanzar a mano desde la pestaña **Actions → Release → Run workflow**.
+
 ## Stack
 
 - **Tauri 2**: empaqueta la app como `.exe`/`.msi` ligero.
@@ -10,7 +32,9 @@ App de escritorio para Windows para llevar el control de lo que comes (calorías
 - **Hevy API** (requiere Hevy Pro): API key en `hevy.com/settings?developer`.
 - **Open Food Facts** y **USDA FoodData Central**: datos de alimentos.
 
-## Instalación en Windows (paso a paso)
+## Desarrollo en Windows (paso a paso)
+
+Solo hace falta si quieres modificar el código.
 
 ### 1. Instala las herramientas (solo la primera vez)
 
@@ -62,7 +86,7 @@ En la app ve a **Ajustes**, pega tu API key de Hevy (la sacas en https://hevy.co
 
 ```powershell
 npm run dev        # abre la app en modo desarrollo
-npm run build:app  # genera el instalador (.msi y .exe) en src-tauri/target/release/bundle
+npm run build:app  # genera el instalador (-setup.exe) en src-tauri/target/release/bundle/nsis
 npm test           # tests de Angular
 ```
 

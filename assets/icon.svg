@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3fa86a"/>
+      <stop offset="1" stop-color="#1f6b42"/>
+    </linearGradient>
+  </defs>
+  <rect x="32" y="32" width="960" height="960" rx="220" fill="url(#bg)"/>
+  <!-- Mancuerna -->
+  <g fill="#ffffff">
+    <rect x="292" y="472" width="440" height="80" rx="24"/>
+    <rect x="196" y="352" width="88" height="320" rx="32"/>
+    <rect x="132" y="412" width="72" height="200" rx="28"/>
+    <rect x="740" y="352" width="88" height="320" rx="32"/>
+    <rect x="820" y="412" width="72" height="200" rx="28"/>
+  </g>
+  <!-- Hoja: comida sana -->
+  <path d="M512 452 C 470 380, 480 290, 590 236 C 620 330, 590 410, 512 452 Z" fill="#c9f2d8"/>
+  <path d="M512 452 C 535 380, 560 320, 590 236" stroke="#1f6b42" stroke-width="12" fill="none" stroke-linecap="round"/>
+</svg>
