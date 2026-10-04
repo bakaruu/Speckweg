@@ -1,0 +1,69 @@
+:root {
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --border: #e3e3df;
+  --text: #1d1d1b;
+  --accent: #2f7d4f;
+  --accent-soft: #e2f1e8;
+  --error: #b3261e;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161716;
+    --surface: #1f201f;
+    --border: #333532;
+    --text: #ececea;
+    --accent: #6fcf97;
+    --accent-soft: #23362b;
+    --error: #f2b8b5;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  max-width: 560px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+input {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: inherit;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+.error {
+  color: var(--error);
+}

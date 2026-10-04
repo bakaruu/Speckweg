@@ -1,0 +1,36 @@
+:host {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  min-height: 100vh;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+}
+
+nav a {
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+nav a.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+main {
+  padding: 24px 32px;
+}
