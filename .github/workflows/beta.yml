@@ -84,7 +84,7 @@ jobs:
           npx tauri build --config src-tauri/tauri.beta.conf.json > build.log 2>&1
           code=$?
           if [ $code -ne 0 ]; then
-            grep -v -E "Compiling|Downloaded|Downloading" build.log | tail -25 | while IFS= read -r line; do echo "::error::$line"; done
+            sed 's/\x1b\[[0-9;]*m//g' build.log | grep -i -E "error|failed|warning: |invalid|panicked|caused by" | tail -9 | while IFS= read -r line; do echo "::error::$line"; done
           fi
           exit $code
 
