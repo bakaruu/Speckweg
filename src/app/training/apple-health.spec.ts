@@ -1,4 +1,4 @@
-import { kcalDuring, parseEnergyFile } from './apple-health';
+import { kcalDuring, parseDate, parseEnergyFile } from './apple-health';
 
 describe('Apple Watch', () => {
   const file = [
@@ -26,5 +26,28 @@ describe('Apple Watch', () => {
     expect(
       kcalDuring(parseEnergyFile(file), '2026-10-05T16:00:00.000Z', '2026-10-05T17:00:00.000Z'),
     ).toBeUndefined();
+  });
+
+  it('entiende la fecha por defecto del iPhone en español', () => {
+    const expected = new Date(2026, 9, 4, 18, 30).getTime();
+    expect(parseDate('4 oct 2026, 18:30')).toBe(expected);
+    expect(parseDate('4 oct. 2026 18:30')).toBe(expected);
+    expect(parseDate('4 de octubre de 2026, 18:30')).toBe(expected);
+    expect(parseDate('4/10/2026, 18:30')).toBe(expected);
+    expect(parseDate('4 sept 2026, 18:30')).toBe(new Date(2026, 8, 4, 18, 30).getTime());
+  });
+
+  it('lee el archivo con fechas por defecto y valores sin unidad', () => {
+    const samples = parseEnergyFile(
+      '4 oct 2026, 18:00;4 oct 2026, 18:01;9,5\n4 oct 2026, 18:01;4 oct 2026, 18:01;3',
+    );
+    expect(samples.map((s) => s.kcal)).toEqual([9.5, 3]);
+    expect(
+      kcalDuring(
+        samples,
+        new Date(2026, 9, 4, 17).toISOString(),
+        new Date(2026, 9, 4, 19).toISOString(),
+      ),
+    ).toBe(13);
   });
 });

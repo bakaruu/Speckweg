@@ -26,13 +26,10 @@ Abre **Atajos** → pestaña Atajos → **+**. Ponle de nombre «Speckweg kcal»
    - Añade el filtro **Fecha de inicio** · **está en los últimos** · **2 días**.
    - Ordenar por **Fecha de inicio**, sin límite.
 2. **Repetir con cada** elemento de «Muestras de salud».
-3. Dentro del Repetir, la acción **Texto** con esto exactamente (tres datos separados por `;`):
-   - Variable **Elemento de repetición** → tócala → elige **Fecha de inicio** → Formato de fecha
-     **ISO 8601** con **Incluir hora** activado.
-   - Escribe `;`
-   - Variable **Elemento de repetición** → **Fecha de finalización**, también en **ISO 8601** con hora.
-   - Escribe `;`
-   - Variable **Elemento de repetición** → **Valor**.
+3. Dentro del Repetir, la acción **Texto**, que debe quedar `Fecha de inicio;Fecha de finalización;Valor`:
+   - Toca el cuadro, elige **Elemento de repetición** encima del teclado, toca la burbuja y elige **Fecha de inicio**.
+   - Escribe `;`, repite con **Fecha de finalización**, escribe `;` y repite con **Valor**.
+   - No hace falta cambiar el formato de las fechas: Speckweg entiende el que pone el iPhone.
 4. Después de «Fin de Repetir»: **Combinar texto** con «Resultados de repetición», separador **Nueva línea**.
 5. **Guardar archivo** con el «Texto combinado»:
    - Desactiva **Preguntar dónde guardar**.
@@ -48,14 +45,14 @@ El archivo queda en iCloud Drive, dentro de la carpeta de Atajos. En Windows sue
 Cada línea queda así:
 
 ```
-2026-10-04T18:00:00+02:00;2026-10-04T18:01:00+02:00;9,5 kcal
+4 oct 2026, 18:30;4 oct 2026, 18:31;9,5 kcal
 ```
 
 ## 4. Que se ejecute solo
 
 Atajos → pestaña **Automatización** → **+**:
 
-- **Entreno del Apple Watch** → **Termina** → Ejecutar inmediatamente → «Speckweg kcal».
+- **Entrenamiento del Apple Watch** → **Al finalizar** → Ejecutar inmediatamente → «Speckweg kcal».
   Así, nada más acabar de entrenar, el archivo ya tiene las kcal.
 - Opcional: **Hora del día** → 23:30, diariamente → Ejecutar inmediatamente → «Speckweg kcal».
 

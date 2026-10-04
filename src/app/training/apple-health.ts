@@ -32,12 +32,49 @@ export function parseEnergyFile(text: string): EnergySample[] {
   return samples;
 }
 
-/** Fecha ISO 8601 ("2026-10-04T18:30:00+02:00") o "2026-10-04 18:30[:00]" en hora local. */
-function parseDate(text: string): number | undefined {
-  const local = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(text);
-  if (local) {
-    const [, y, mo, d, h, mi, s] = local.map(Number);
+const MONTHS: Record<string, number> = {
+  ene: 0,
+  jan: 0,
+  feb: 1,
+  mar: 2,
+  abr: 3,
+  apr: 3,
+  may: 4,
+  jun: 5,
+  jul: 6,
+  ago: 7,
+  aug: 7,
+  sep: 8,
+  oct: 9,
+  nov: 10,
+  dic: 11,
+  dec: 11,
+};
+
+/**
+ * Fecha tal como la escribe el Atajo: la de por defecto del iPhone en español ("4 oct 2026, 18:30",
+ * "4/10/2026 18:30", "4 de octubre de 2026, 18:30"), en hora local, o ISO 8601.
+ */
+export function parseDate(text: string): number | undefined {
+  const iso = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(text);
+  if (iso) {
+    const [, y, mo, d, h, mi, s] = iso.map(Number);
     return new Date(y, mo - 1, d, h, mi, s || 0).getTime();
+  }
+  const local =
+    /^(\d{1,2})[\s./-]+(?:de\s+)?([a-záéíóú]+|\d{1,2})\.?[\s./-]+(?:de\s+)?(\d{4}),?\s+(?:a las\s+)?(\d{1,2}):(\d{2})(?::(\d{2}))?/i.exec(
+      text,
+    );
+  if (local) {
+    const month = /^\d+$/.test(local[2])
+      ? Number(local[2]) - 1
+      : MONTHS[local[2].slice(0, 3).toLowerCase()];
+    if (month !== undefined) {
+      const [d, y, h, mi, s] = [local[1], local[3], local[4], local[5], local[6]].map((v) =>
+        Number(v ?? 0),
+      );
+      return new Date(y, month, d, h, mi, s).getTime();
+    }
   }
   const time = Date.parse(text);
   return Number.isNaN(time) ? undefined : time;
