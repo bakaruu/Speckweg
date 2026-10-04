@@ -47,3 +47,18 @@ describe('daily-plan', () => {
     expect(isoDate(day)).toBe('2026-10-04');
   });
 });
+
+describe('meal-catalog', () => {
+  it('cada plato tiene una ración con peso para poder apuntarlo en gramos', () => {
+    for (const meal of MEAL_CATALOG) {
+      expect(meal.portion.length).toBeGreaterThan(0);
+      expect(meal.portionG).toBeGreaterThan(0);
+    }
+  });
+
+  it('incluye platos con brócoli en comidas y cenas', () => {
+    const withBroccoli = MEAL_CATALOG.filter((m) => m.name.toLowerCase().includes('brócoli'));
+    expect(withBroccoli.some((m) => m.slot === 'comida')).toBe(true);
+    expect(withBroccoli.some((m) => m.slot === 'cena')).toBe(true);
+  });
+});
