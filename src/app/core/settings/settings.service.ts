@@ -16,6 +16,9 @@ export class SettingsService {
   }
 
   async setHevyApiKey(key: string): Promise<void> {
-    await (await this.open()).set('hevyApiKey', key.trim());
+    const store = await this.open();
+    await store.set('hevyApiKey', key.trim());
+    // Guardado explícito en disco, sin depender del autoguardado diferido.
+    await store.save();
   }
 }

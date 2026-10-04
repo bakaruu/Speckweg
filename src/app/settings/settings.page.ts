@@ -26,25 +26,37 @@ export class SettingsPage implements OnInit {
   private readonly settings = inject(SettingsService);
   private readonly hevy = inject(HevyClient);
 
-  protected apiKey = '';
+  protected readonly apiKey = signal('');
   protected readonly busy = signal(false);
   protected readonly message = signal<{ text: string; error: boolean } | null>(null);
 
   async ngOnInit(): Promise<void> {
-    this.apiKey = (await this.settings.getHevyApiKey()) ?? '';
+    // Es un signal para que la pantalla se actualice al terminar de leer el ajuste (la app no usa zone.js).
+    this.apiKey.set((await this.settings.getHevyApiKey()) ?? '');
   }
 
   protected async save(): Promise<void> {
     this.busy.set(true);
     this.message.set(null);
     try {
-      const count = await this.hevy.countWorkouts(this.apiKey.trim());
-      await this.settings.setHevyApiKey(this.apiKey);
-      this.message.set({ text: `Conectado. Tienes ${count} entrenos en Hevy.`, error: false });
+      // Se guarda antes de probarla, para no tener que volver a pegarla aunque falle la conexión.
+      await this.settings.setHevyApiKey(this.apiKey());
     } catch (e) {
-      this.message.set({ text: e instanceof Error ? e.message : String(e), error: true });
+      this.message.set({ text: `No se pudo guardar la key: ${errorText(e)}`, error: true });
+      this.busy.set(false);
+      return;
+    }
+    try {
+      const count = await this.hevy.countWorkouts();
+      this.message.set({ text: `Guardada y conectada. Tienes ${count} entrenos en Hevy.`, error: false });
+    } catch (e) {
+      this.message.set({ text: `Key guardada, pero no se pudo conectar con Hevy: ${errorText(e)}`, error: true });
     } finally {
       this.busy.set(false);
     }
   }
+}
+
+function errorText(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
 }
