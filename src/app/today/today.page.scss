@@ -55,12 +55,76 @@ header p {
 }
 
 .meals li {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.row {
   display: grid;
   grid-template-columns: 90px 1fr auto auto;
   gap: 16px;
   align-items: center;
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.tag {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  vertical-align: middle;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.log {
+  margin: 12px 0 0 106px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.log p {
+  margin: 8px 0;
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sizes button.selected {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.grams input {
+  max-width: 140px;
+}
+
+select {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: inherit;
 }
 
 .slot {
