@@ -1,7 +1,9 @@
 import { inject, Injectable, signal } from '@angular/core';
+import { invoke } from '@tauri-apps/api/core';
 import { DatabaseService } from '../core/db/database.service';
 import { SettingsService } from '../core/settings/settings.service';
 import { HevyClient, HevyWorkout } from './hevy.client';
+import { kcalDuring, parseEnergyFile } from './apple-health';
 import { DEFAULT_WEIGHT_KG, estimateKcal, parseHevyCsv, summarize } from './workout';
 
 /** Desde cuándo pedir cambios la primera vez: todo el historial. */
@@ -19,18 +21,81 @@ export class TrainingService {
   /** Sube cada vez que cambian los entrenos guardados, para que las pantallas se refresquen. */
   readonly version = signal(0);
 
-  private startup?: Promise<void>;
+  private startup?: Promise<string[]>;
 
-  /** Sincroniza una sola vez al abrir la app. Sin API key no hace nada ni da error. */
-  async syncOnStartup(): Promise<void> {
-    if (!this.startup) {
+  /**
+   * Sincroniza una sola vez al abrir la app: Hevy (si hay API key) y luego las kcal del Apple Watch.
+   * Devuelve los errores para enseñarlos, sin que uno impida lo otro.
+   */
+  syncOnStartup(): Promise<string[]> {
+    this.startup ??= (async () => {
       this.lastSync.set(await this.settings.getHevyLastSync());
-      if (!(await this.settings.getHevyApiKey())) {
-        return;
-      }
-      this.startup ??= this.sync().then(() => undefined);
-    }
+      return this.refresh(!!(await this.settings.getHevyApiKey()));
+    })();
     return this.startup;
+  }
+
+  /** Hevy y Apple Watch, uno detrás de otro. Devuelve los mensajes de error, si los hay. */
+  async refresh(withHevy = true): Promise<string[]> {
+    const errors: string[] = [];
+    if (withHevy) {
+      try {
+        await this.sync();
+      } catch (e) {
+        errors.push(`No se pudo sincronizar con Hevy: ${errorText(e)}`);
+      }
+    }
+    try {
+      await this.syncWatch();
+    } catch (e) {
+      errors.push(`No se pudieron leer las kcal del Apple Watch: ${errorText(e)}`);
+    }
+    return errors;
+  }
+
+  /**
+   * Lee el archivo que deja el Atajo del iPhone en iCloud Drive y apunta en cada entreno las kcal
+   * reales del reloj. Devuelve la ruta leída, o undefined si no hay archivo.
+   */
+  async syncWatch(): Promise<{ path: string; updated: number } | undefined> {
+    const file = await invoke<{ path: string; content: string } | null>('read_health_file', {
+      customPath: (await this.settings.getHealthFilePath()) ?? null,
+    });
+    if (!file) {
+      return undefined;
+    }
+    return { path: file.path, updated: await this.applyEnergy(file.content) };
+  }
+
+  /** Igual que syncWatch, pero con un archivo elegido a mano. Devuelve cuántos entrenos han cambiado. */
+  async applyEnergy(text: string): Promise<number> {
+    const samples = parseEnergyFile(text);
+    if (samples.length === 0) {
+      return 0;
+    }
+    const from = new Date(Math.min(...samples.map((s) => s.start)) - 6 * 3600_000).toISOString();
+    const to = new Date(Math.max(...samples.map((s) => s.end))).toISOString();
+    const rows = await this.db.select<{ id: string; raw_json: string }>(
+      `SELECT id, raw_json FROM workout WHERE start_time >= $1 AND start_time <= $2`,
+      [from, to],
+    );
+    let updated = 0;
+    for (const row of rows) {
+      const workout = JSON.parse(row.raw_json) as HevyWorkout;
+      const kcal = kcalDuring(samples, workout.start_time, workout.end_time);
+      if (kcal !== undefined && kcal !== workout.watch_kcal) {
+        workout.watch_kcal = kcal;
+        await this.db.execute(
+          `UPDATE workout SET raw_json = $1, estimated_kcal = $2 WHERE id = $3`,
+          [JSON.stringify(workout), kcal, row.id],
+        );
+        updated++;
+      }
+    }
+    if (updated > 0) {
+      this.version.update((v) => v + 1);
+    }
+    return updated;
   }
 
   /** Trae de Hevy lo creado, cambiado o borrado desde la última vez. Devuelve cuántos entrenos han cambiado. */
@@ -108,6 +173,15 @@ export class TrainingService {
     // Fechas siempre en UTC con el mismo formato, para poder compararlas como texto.
     const workout = { ...raw, start_time: toIso(raw.start_time), end_time: toIso(raw.end_time) };
     const summary = summarize(workout);
+    // Conserva las kcal del reloj que ya se hubieran apuntado en este entreno.
+    const [previous] = await this.db.select<{ kcal: number | null }>(
+      `SELECT json_extract(raw_json, '$.watch_kcal') AS kcal FROM workout
+       WHERE id = $1 OR (id LIKE 'csv:%' AND substr(start_time, 1, 16) = substr($2, 1, 16))`,
+      [workout.id, workout.start_time],
+    );
+    if (previous?.kcal != null) {
+      workout.watch_kcal = previous.kcal;
+    }
     if (!workout.id.startsWith('csv:')) {
       // Si ese entreno se había importado antes por CSV, se queda solo la versión de la API.
       await this.db.execute(
@@ -128,7 +202,7 @@ export class TrainingService {
         workout.start_time,
         workout.end_time,
         summary.volumeKg,
-        estimateKcal(summary.durationMin, weightKg),
+        workout.watch_kcal ?? estimateKcal(summary.durationMin, weightKg),
         JSON.stringify(workout),
         workout.updated_at,
       ],
@@ -139,4 +213,8 @@ export class TrainingService {
 function toIso(text: string): string {
   const time = Date.parse(text);
   return Number.isNaN(time) ? text : new Date(time).toISOString();
+}
+
+function errorText(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
 }

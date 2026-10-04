@@ -42,4 +42,15 @@ export class SettingsService {
     await store.set('hevyLastSync', iso);
     await store.save();
   }
+
+  /** Ruta del archivo del Atajo del Apple Watch, si no está en el sitio de siempre de iCloud Drive. */
+  async getHealthFilePath(): Promise<string | undefined> {
+    return (await this.open()).get<string>('healthFilePath');
+  }
+
+  async setHealthFilePath(path: string): Promise<void> {
+    const store = await this.open();
+    await store.set('healthFilePath', path.trim());
+    await store.save();
+  }
 }

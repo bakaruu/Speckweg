@@ -17,8 +17,8 @@ import { describeSets, estimateKcal, summarize } from './workout';
           @if (lastSyncLabel(); as label) {
             <span class="muted">{{ label }}</span>
           }
-          <button class="secondary" (click)="sync()" [disabled]="training.syncing() || !hasKey()">
-            {{ training.syncing() ? 'Sincronizando…' : 'Sincronizar' }}
+          <button class="secondary" (click)="sync()" [disabled]="busy() || !hasKey()">
+            {{ busy() ? 'Sincronizando…' : 'Sincronizar' }}
           </button>
         </div>
       </header>
@@ -56,9 +56,15 @@ import { describeSets, estimateKcal, summarize } from './workout';
             <span
               ><strong>{{ w.summary.volumeKg }}</strong> kg de volumen</span
             >
-            <span
-              ><strong>~{{ w.kcal }}</strong> kcal</span
-            >
+            @if (w.watch_kcal != null) {
+              <span
+                ><strong>{{ w.kcal }}</strong> kcal del Apple Watch</span
+              >
+            } @else {
+              <span
+                ><strong>~{{ w.kcal }}</strong> kcal estimadas</span
+              >
+            }
           </div>
           <ul>
             @for (e of w.exercises; track e.index) {
@@ -71,8 +77,11 @@ import { describeSets, estimateKcal, summarize } from './workout';
         </div>
       }
 
-      @if (today().length > 0) {
-        <p class="muted small">Calorías aproximadas según la duración y tu peso; Hevy no las da.</p>
+      @if (anyEstimated()) {
+        <p class="muted small">
+          Sin datos del Apple Watch para este entreno: las kcal se estiman con la duración y tu
+          peso.
+        </p>
       }
     </section>
   `,
@@ -145,9 +154,15 @@ export class WorkoutsCard {
   protected readonly today = computed(() =>
     this.workouts().map((w) => {
       const summary = summarize(w);
-      return { ...w, summary, kcal: estimateKcal(summary.durationMin, this.weightKg()) };
+      return {
+        ...w,
+        summary,
+        kcal: w.watch_kcal ?? estimateKcal(summary.durationMin, this.weightKg()),
+      };
     }),
   );
+  protected readonly anyEstimated = computed(() => this.today().some((w) => w.watch_kcal == null));
+  protected readonly busy = signal(false);
   protected readonly lastSyncLabel = computed(() => {
     const iso = this.training.lastSync();
     if (!iso) {
@@ -172,28 +187,25 @@ export class WorkoutsCard {
   private async start(): Promise<void> {
     this.hasKey.set(!!(await this.settings.getHevyApiKey()));
     this.weightKg.set(await this.settings.getWeightKg());
-    try {
-      await this.training.syncOnStartup();
-    } catch (e) {
-      this.message.set({ text: `No se pudo sincronizar con Hevy: ${errorText(e)}`, error: true });
-    }
+    this.busy.set(true);
+    this.showErrors(await this.training.syncOnStartup());
+    this.busy.set(false);
   }
 
   protected async sync(): Promise<void> {
     this.message.set(null);
-    try {
-      const changed = await this.training.sync();
-      this.message.set({
-        text:
-          changed === 0
-            ? 'Todo al día, no hay entrenos nuevos.'
-            : changed === 1
-              ? '1 entreno actualizado.'
-              : `${changed} entrenos actualizados.`,
-        error: false,
-      });
-    } catch (e) {
-      this.message.set({ text: `No se pudo sincronizar con Hevy: ${errorText(e)}`, error: true });
+    this.busy.set(true);
+    const errors = await this.training.refresh();
+    this.busy.set(false);
+    if (errors.length === 0) {
+      this.message.set({ text: 'Todo al día.', error: false });
+    }
+    this.showErrors(errors);
+  }
+
+  private showErrors(errors: string[]): void {
+    if (errors.length > 0) {
+      this.message.set({ text: errors.join(' '), error: true });
     }
   }
 

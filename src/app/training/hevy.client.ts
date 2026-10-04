@@ -34,6 +34,8 @@ export interface HevyWorkout {
   updated_at: string;
   created_at?: string;
   exercises: HevyExercise[];
+  /** Kcal activas del Apple Watch durante el entreno. No viene de Hevy: lo añade Speckweg. */
+  watch_kcal?: number;
 }
 
 export type HevyWorkoutEvent =

@@ -11,6 +11,41 @@ fn migrations() -> Vec<Migration> {
   }]
 }
 
+/// Archivo que deja el Atajo del iPhone con la energía activa del Apple Watch.
+#[derive(serde::Serialize)]
+struct HealthFile {
+  path: String,
+  content: String,
+}
+
+/// Sitios donde iCloud para Windows suele dejar el archivo del Atajo, del más al menos probable.
+fn health_file_candidates() -> Vec<std::path::PathBuf> {
+  let Some(home) = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME")) else {
+    return Vec::new();
+  };
+  let icloud = std::path::PathBuf::from(home).join("iCloudDrive");
+  ["iCloud~is~workflow~my~workflows", "Shortcuts", "Atajos", ""]
+    .iter()
+    .map(|folder| icloud.join(folder).join("Speckweg").join("energia.txt"))
+    .collect()
+}
+
+/// Lee el archivo del Atajo: el de la ruta indicada en Ajustes o, si no hay, el primero que exista en iCloud Drive.
+#[tauri::command]
+fn read_health_file(custom_path: Option<String>) -> Result<Option<HealthFile>, String> {
+  let candidates = match custom_path.filter(|p| !p.trim().is_empty()) {
+    Some(path) => vec![std::path::PathBuf::from(path.trim())],
+    None => health_file_candidates(),
+  };
+  for path in candidates {
+    if path.is_file() {
+      let content = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+      return Ok(Some(HealthFile { path: path.display().to_string(), content }));
+    }
+  }
+  Ok(None)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -23,6 +58,7 @@ pub fn run() {
     .plugin(tauri_plugin_store::Builder::default().build())
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_process::init())
+    .invoke_handler(tauri::generate_handler![read_health_file])
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(
