@@ -32,7 +32,7 @@ La primera vez, descarga e instala la Beta desde la [release beta](https://githu
 
 ### Firma de actualizaciones
 
-Las actualizaciones van firmadas para que la app solo acepte instaladores salidos de este repo. La clave pública está en `src-tauri/tauri.conf.json`. La privada se guarda como secreto del repo, con el nombre `TAURI_SIGNING_PRIVATE_KEY`, en *Settings → Secrets and variables → Actions*. Si se pierde, las apps ya instaladas no podrán actualizarse solas y habrá que reinstalarlas a mano.
+Las actualizaciones van firmadas para que la app solo acepte instaladores salidos de este repo. La clave pública está en `src-tauri/tauri.conf.json`. La privada se guarda como secreto del repo, con el nombre `TAURI_SIGNING_PRIVATE_KEY` (y su contraseña, si tiene, en `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`), en *Settings → Secrets and variables → Actions*. Si se pierde, las apps ya instaladas no podrán actualizarse solas y habrá que reinstalarlas a mano.
 
 ## Stack
 

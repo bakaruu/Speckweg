@@ -50,7 +50,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDMwREJFRjI1NjU1NUU3OTQKUldTVTUxVmxKZS9iTUVqczFkZDNjYTlwaFd3ZTJtTitsZVBKRUd3cWppdXJJV1BTN29yaWVIMEUK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE4MjAxNTc5QTlDRDMyOEUKUldTT01zMnBlUlVnR0ZHY3QzUVZ4WDZUWDRodUtTenB3RE9rWGJUelpLNU1sT2NXUk9UaTFOMVUK",
       "endpoints": [
         "https://github.com/bakaruu/Speckweg/releases/latest/download/latest.json"
       ],
