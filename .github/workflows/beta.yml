@@ -1,0 +1,76 @@
+name: Beta
+
+# Cada push a la rama dev compila "Speckweg Beta" (app aparte, con sus propios datos)
+# y la publica en la release "beta". La Beta instalada lo detecta al abrirse y se actualiza sola.
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: beta
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - run: npm ci
+
+      - run: npm test -- --watch=false
+
+      # Versión de la Beta: la de tauri.conf.json + "-beta.N", para que cada build sea más nueva que la anterior.
+      - name: Poner versión beta
+        shell: bash
+        run: |
+          node -e "
+            const fs = require('fs');
+            const base = require('./src-tauri/tauri.conf.json').version;
+            const p = './src-tauri/tauri.beta.conf.json';
+            const beta = JSON.parse(fs.readFileSync(p, 'utf8'));
+            beta.version = base + '-beta.' + process.env.GITHUB_RUN_NUMBER;
+            fs.writeFileSync(p, JSON.stringify(beta, null, 2));
+            console.log('Versión beta:', beta.version);
+          "
+
+      # La release "beta" se reutiliza: se borran los instaladores anteriores para dejar solo el último.
+      - name: Limpiar la release beta anterior
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view beta >/dev/null 2>&1; then
+            gh release view beta --json assets --jq '.assets[].name' | while IFS= read -r asset; do
+              gh release delete-asset beta "$asset" --yes
+            done
+          fi
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+        with:
+          args: --config src-tauri/tauri.beta.conf.json
+          tagName: beta
+          releaseName: 'Speckweg Beta'
+          releaseBody: 'Versión de pruebas. Descarga el **-setup.exe**, instálalo una vez y a partir de ahí se actualiza sola al abrirla. Se instala aparte de Speckweg y tiene sus propios datos.'
+          releaseDraft: false
+          prerelease: true
+          includeUpdaterJson: true

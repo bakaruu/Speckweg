@@ -1,12 +1,8 @@
 name: Release
 
-# Compila el instalador de Windows y lo publica como Release en GitHub.
-# Se lanza al subir una etiqueta vX.Y.Z (git tag v0.2.0 && git push origin v0.2.0)
-# o a mano desde la pestaña Actions.
+# Publica la versión final vX.Y.Z (la de src-tauri/tauri.conf.json) desde main.
+# Se lanza a mano: Actions → Release → Run workflow. Solo después de validar la Beta.
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -14,6 +10,7 @@ permissions:
 
 jobs:
   windows:
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,12 +28,17 @@ jobs:
 
       - run: npm ci
 
+      - run: npm test -- --watch=false
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
         with:
-          tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}
+          tagName: v__VERSION__
           releaseName: 'Speckweg v__VERSION__'
-          releaseBody: 'Descarga **Speckweg_x.y.z_x64-setup.exe**, ábrelo y sigue el asistente. Se crea un acceso directo en el menú Inicio (y en el escritorio si marcas la casilla al final).'
+          releaseBody: 'Descarga **Speckweg_x.y.z_x64-setup.exe**, ábrelo y sigue el asistente. Si ya tienes Speckweg instalado, la app te avisará al abrirla y se actualiza sola.'
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: true

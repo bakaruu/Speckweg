@@ -8,21 +8,31 @@ App de escritorio para Windows para llevar el control de lo que comes (calorías
 2. Ábrelo y sigue el asistente. No pide permisos de administrador.
 3. Windows puede mostrar "Windows protegió su PC" porque la app no está firmada: pulsa **Más información** y luego **Ejecutar de todas formas**.
 4. Abre **Speckweg** desde el menú Inicio o el acceso directo del escritorio.
-
-Para actualizar, descarga la versión nueva e instálala encima; tus datos se conservan.
+5. A partir de ahí, cuando haya una versión nueva la app te avisará al abrirla.
 
 Tus datos (base de datos y ajustes) se guardan en `%APPDATA%\com.bakaruu.speckweg`.
 
-### Publicar una versión nueva
+### Cómo se prueba y se publica una versión
 
-Sube el número de versión en `src-tauri/tauri.conf.json` y en `package.json`, y luego:
+Hay dos apps que se instalan por separado y cada una tiene sus propios datos:
 
-```powershell
-git tag v0.2.0
-git push origin v0.2.0
-```
+- **Speckweg**: la versión normal, para el día a día.
+- **Speckweg Beta** (icono naranja): la versión de pruebas. Así las pruebas no ensucian tu diario real.
 
-GitHub Actions compila el instalador y crea la Release sola. También se puede lanzar a mano desde la pestaña **Actions → Release → Run workflow**.
+Las dos comprueban al abrirse si hay una versión nueva. Si la hay, sale un aviso con el botón **Actualizar**, que la instala y reinicia la app.
+
+El flujo de trabajo es este:
+
+1. **Cada cambio va en una rama con su pull request contra `dev`.** El check *Comprobar* pasa los tests y compila la app.
+2. **Al fusionar en `dev`**, GitHub compila la Beta y la publica en la release [`beta`](https://github.com/bakaruu/Speckweg/releases/tag/beta). La Beta que tengas instalada se actualiza al abrirla.
+3. **Cuando la Beta esté bien**, se abre un pull request de `dev` a `main` subiendo el número de versión en `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` y `package.json`.
+4. **Al fusionarlo**, se lanza *Actions → Release → Run workflow* sobre `main`. Esto publica la versión final `vX.Y.Z` y la app normal se actualiza sola.
+
+La primera vez, descarga e instala la Beta desde la [release beta](https://github.com/bakaruu/Speckweg/releases/tag/beta).
+
+### Firma de actualizaciones
+
+Las actualizaciones van firmadas para que la app solo acepte instaladores salidos de este repo. La clave pública está en `src-tauri/tauri.conf.json`. La privada se guarda como secreto del repo, con el nombre `TAURI_SIGNING_PRIVATE_KEY`, en *Settings → Secrets and variables → Actions*. Si se pierde, las apps ya instaladas no podrán actualizarse solas y habrá que reinstalarlas a mano.
 
 ## Stack
 
@@ -95,7 +105,8 @@ npm test           # tests de Angular
 ```
 src/app/
   core/db/          acceso a SQLite
-  core/settings/    ajustes locales (API key de Hevy)
+  core/settings/    ajustes locales (API key de Hevy, peso)
+  core/updates/     aviso de actualización (updater de Tauri)
   training/         cliente de la API de Hevy
   settings/         pantalla de ajustes
   today/            resumen del día
