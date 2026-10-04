@@ -13,16 +13,16 @@ Para actualizar, descarga la versión nueva e instálala encima; tus datos se co
 
 Tus datos (base de datos y ajustes) se guardan en `%APPDATA%\com.bakaruu.speckweg`.
 
-### Publicar una versión nueva
+### Cómo se prueba y se publica una versión
 
-Sube el número de versión en `src-tauri/tauri.conf.json` y en `package.json`, y luego:
+Nada se publica sin probarlo antes:
 
-```powershell
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-GitHub Actions compila el instalador y crea la Release sola. También se puede lanzar a mano desde la pestaña **Actions → Release → Run workflow**.
+1. **Cada cambio va en una rama con su pull request.** GitHub compila un instalador de prueba automáticamente (workflow *Instalador de prueba*).
+2. **Pruébalo:** en el pull request, pestaña *Checks* → *Instalador de prueba* → *Summary* → sección *Artifacts*, descarga `speckweg-prueba-prN`, descomprímelo e instálalo. Se instala encima de tu versión y conserva tus datos.
+3. **Si va bien, fusiona el pull request** en `main`. Si no, se corrige en la misma rama y sale otro instalador de prueba.
+4. **Publica la versión:** sube el número de versión en `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` y `package.json`, y en *Actions → Release → Run workflow* elige:
+   - `prueba`: crea una pre-release `vX.Y.Z-beta.N` para probar la versión completa.
+   - `final`: crea la versión `vX.Y.Z` que aparece como la última en Releases.
 
 ## Stack
 

@@ -1,0 +1,40 @@
+name: Instalador de prueba
+
+# Compila el instalador de Windows en cada pull request (y a mano desde Actions)
+# y lo deja como artefacto descargable para probarlo antes de publicar nada.
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - run: npm ci
+
+      - run: npm test -- --watch=false
+
+      - run: npx tauri build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: speckweg-prueba-${{ github.event.pull_request.number && format('pr{0}', github.event.pull_request.number) || github.run_number }}
+          path: src-tauri/target/release/bundle/nsis/*.exe
+          retention-days: 14

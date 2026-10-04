@@ -1,13 +1,19 @@
 name: Release
 
-# Compila el instalador de Windows y lo publica como Release en GitHub.
-# Se lanza al subir una etiqueta vX.Y.Z (git tag v0.2.0 && git push origin v0.2.0)
-# o a mano desde la pestaña Actions.
+# Publica el instalador como Release en GitHub. Se lanza a mano desde
+# Actions → Release → Run workflow, eligiendo:
+#   - prueba: pre-release vX.Y.Z-beta.N (no se marca como la última versión)
+#   - final:  versión vX.Y.Z (usa la versión de src-tauri/tauri.conf.json)
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
+    inputs:
+      tipo:
+        description: 'Tipo de versión'
+        type: choice
+        options:
+          - prueba
+          - final
+        default: prueba
 
 permissions:
   contents: write
@@ -31,12 +37,14 @@ jobs:
 
       - run: npm ci
 
+      - run: npm test -- --watch=false
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}
-          releaseName: 'Speckweg v__VERSION__'
+          tagName: ${{ inputs.tipo == 'final' && 'v__VERSION__' || format('v__VERSION__-beta.{0}', github.run_number) }}
+          releaseName: ${{ inputs.tipo == 'final' && 'Speckweg v__VERSION__' || format('Speckweg v__VERSION__ (prueba {0})', github.run_number) }}
           releaseBody: 'Descarga **Speckweg_x.y.z_x64-setup.exe**, ábrelo y sigue el asistente. Se crea un acceso directo en el menú Inicio (y en el escritorio si marcas la casilla al final).'
           releaseDraft: false
-          prerelease: false
+          prerelease: ${{ inputs.tipo != 'final' }}
