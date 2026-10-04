@@ -73,6 +73,21 @@ jobs:
             done
           fi
 
+      # Diagnóstico temporal: compila guardando la salida y la muestra como anotaciones si falla.
+      - name: Compilar (diagnóstico)
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+        run: |
+          set +e
+          npx tauri build --config src-tauri/tauri.beta.conf.json > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            grep -v -E "Compiling|Downloaded|Downloading" build.log | tail -25 | while IFS= read -r line; do echo "::error::$line"; done
+          fi
+          exit $code
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
