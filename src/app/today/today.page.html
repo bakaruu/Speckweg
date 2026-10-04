@@ -31,19 +31,117 @@
   <ul class="meals">
     @for (item of meals(); track item.slot) {
       <li>
-        <div class="slot">{{ slotLabels[item.slot] }}</div>
-        <div class="info">
-          <strong>{{ item.meal.name }}</strong>
-          <span class="muted">{{ item.meal.ingredients }}</span>
+        <div class="row">
+          <div class="slot">{{ slotLabels[item.slot] }}</div>
+          <div class="info">
+            <strong>
+              {{ item.meal.name }}
+              @if (item.meal.usual) {
+                <span class="tag">De los tuyos</span>
+              }
+            </strong>
+            <span class="muted">{{ item.meal.ingredients }}</span>
+            <span class="muted">Ración: {{ item.meal.portion }}</span>
+          </div>
+          <div class="macros">
+            <strong>{{ item.meal.proteinG }} g</strong>
+            <span class="muted">{{ item.meal.kcal }} kcal</span>
+          </div>
+          <div class="actions">
+            <button class="secondary" (click)="another(item.slot)" title="Otra sugerencia">Otra</button>
+            <button (click)="openLog(item.slot, item.meal)">Apuntar</button>
+          </div>
         </div>
-        <div class="macros">
-          <strong>{{ item.meal.proteinG }} g</strong>
-          <span class="muted">{{ item.meal.kcal }} kcal</span>
-        </div>
-        <button class="secondary" (click)="another(item.slot)" title="Otra sugerencia">Otra</button>
+
+        @if (form()?.slot === item.slot) {
+          <div class="log">
+            <label>
+              ¿Qué has comido?
+              <select (change)="chooseMeal($any($event.target).value)">
+                @for (option of optionsFor(item.slot); track option.id) {
+                  <option [value]="option.id" [selected]="option.id === form()?.mealId">{{ option.name }}</option>
+                }
+              </select>
+            </label>
+
+            @if (formMeal(); as meal) {
+              <p class="muted small">¿Cuánto, a ojo? La ración normal es {{ meal.portion }}.</p>
+              <div class="sizes">
+                @for (p of portionSizes; track p.size) {
+                  <button
+                    class="secondary"
+                    [class.selected]="form()?.amount?.kind === 'size' && $any(form()?.amount).size === p.size"
+                    (click)="chooseAmount({ kind: 'size', size: p.size }); grams.value = ''"
+                  >
+                    {{ p.label }} <span class="muted">· {{ sizeKcal(meal, p.size) }} kcal</span>
+                  </button>
+                }
+              </div>
+              <label class="grams">
+                O, si lo has pesado, en gramos
+                <input #grams type="number" min="1" inputmode="numeric" placeholder="Opcional" (input)="typeGrams(grams.value)" />
+              </label>
+
+              @if (formPreview(); as p) {
+                <p>
+                  Se apuntan unos <strong>{{ p.grams }} g</strong>: {{ p.proteinG }} g de proteína · {{ p.kcal }} kcal
+                </p>
+              }
+              <div class="actions">
+                <button (click)="saveLog()" [disabled]="saving() || !formPreview()">Guardar</button>
+                <button class="secondary" (click)="closeLog()">Cancelar</button>
+              </div>
+            }
+          </div>
+        }
       </li>
     }
   </ul>
 
   <p class="muted note">Valores aproximados por ración.</p>
+</section>
+
+<section class="card day">
+  <header>
+    <div>
+      <h2>Lo que has comido hoy</h2>
+    </div>
+    <div class="target">
+      <span class="big">{{ eaten().proteinG }} / {{ proteinTarget() }} g</span>
+      <span class="muted">proteína · {{ eaten().kcal }} kcal</span>
+    </div>
+  </header>
+
+  <div class="bar" role="progressbar" [attr.aria-valuenow]="eatenPct()" aria-valuemin="0" aria-valuemax="100">
+    <div class="fill" [style.width.%]="eatenPct()"></div>
+  </div>
+
+  @if (error(); as e) {
+    <p class="error">{{ e }}</p>
+  }
+
+  @if (entries().length === 0) {
+    <p class="muted">Todavía no has apuntado nada. Pulsa «Apuntar» en un plato de arriba.</p>
+  } @else {
+    <ul class="meals">
+      @for (entry of entries(); track entry.id) {
+        <li>
+          <div class="row">
+            <div class="slot">{{ slotLabels[entry.slot] }}</div>
+            <div class="info">
+              <strong>{{ entry.name }}</strong>
+              <span class="muted">{{ entry.grams }} g</span>
+            </div>
+            <div class="macros">
+              <strong>{{ entry.proteinG }} g</strong>
+              <span class="muted">{{ entry.kcal }} kcal</span>
+            </div>
+            <div class="actions">
+              <button class="secondary" (click)="removeEntry(entry.id)" title="Quitar">Quitar</button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
 </section>
