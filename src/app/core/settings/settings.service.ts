@@ -31,4 +31,15 @@ export class SettingsService {
     await store.set('weightKg', kg);
     await store.save();
   }
+
+  /** Momento (ISO 8601) de la última sincronización correcta con Hevy. */
+  async getHevyLastSync(): Promise<string | undefined> {
+    return (await this.open()).get<string>('hevyLastSync');
+  }
+
+  async setHevyLastSync(iso: string): Promise<void> {
+    const store = await this.open();
+    await store.set('hevyLastSync', iso);
+    await store.save();
+  }
 }

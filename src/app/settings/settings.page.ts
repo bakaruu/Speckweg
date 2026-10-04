@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../core/settings/settings.service';
 import { PROTEIN_G_PER_KG, proteinTargetG } from '../planner/daily-plan';
 import { HevyClient } from '../training/hevy.client';
+import { TrainingService } from '../training/training.service';
 
 @Component({
   selector: 'app-settings-page',
@@ -32,12 +33,27 @@ import { HevyClient } from '../training/hevy.client';
       @if (message(); as m) {
         <p [class.error]="m.error">{{ m.text }}</p>
       }
+      <h3>Importar CSV de Hevy</h3>
+      <p>
+        Por si la API falla: en Hevy ve a Perfil → Ajustes → Exportar e importar datos → Exportar
+        entrenos, y elige aquí el archivo. Los entrenos que ya estén no se duplican.
+      </p>
+      <input
+        type="file"
+        accept=".csv,text/csv"
+        (change)="importCsv($event)"
+        [disabled]="importing()"
+      />
+      @if (importMessage(); as m) {
+        <p [class.error]="m.error">{{ m.text }}</p>
+      }
     </section>
   `,
 })
 export class SettingsPage implements OnInit {
   private readonly settings = inject(SettingsService);
   private readonly hevy = inject(HevyClient);
+  private readonly training = inject(TrainingService);
 
   protected readonly apiKey = signal('');
   protected readonly proteinPerKg = PROTEIN_G_PER_KG;
@@ -45,6 +61,8 @@ export class SettingsPage implements OnInit {
   protected readonly weightMessage = signal<string | null>(null);
   protected readonly busy = signal(false);
   protected readonly message = signal<{ text: string; error: boolean } | null>(null);
+  protected readonly importing = signal(false);
+  protected readonly importMessage = signal<{ text: string; error: boolean } | null>(null);
 
   async ngOnInit(): Promise<void> {
     // Es un signal para que la pantalla se actualice al terminar de leer el ajuste (la app no usa zone.js).
@@ -79,6 +97,26 @@ export class SettingsPage implements OnInit {
       this.message.set({ text: `Key guardada, pero no se pudo conectar con Hevy: ${errorText(e)}`, error: true });
     } finally {
       this.busy.set(false);
+    }
+  }
+
+  protected async importCsv(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    this.importing.set(true);
+    this.importMessage.set(null);
+    try {
+      const { imported, skipped } = await this.training.importCsv(await file.text());
+      const extra = skipped > 0 ? ` (${skipped} ya estaban)` : '';
+      this.importMessage.set({ text: `Importados ${imported} entrenos${extra}.`, error: false });
+    } catch (e) {
+      this.importMessage.set({ text: `No se pudo importar: ${errorText(e)}`, error: true });
+    } finally {
+      input.value = '';
+      this.importing.set(false);
     }
   }
 }

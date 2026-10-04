@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { WorkoutsCard } from '../training/workouts-card';
 import { SettingsService } from '../core/settings/settings.service';
 import { MEAL_SLOTS, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
 import { MealSlot } from '../planner/meal-catalog';
@@ -13,7 +14,7 @@ const SLOT_LABELS: Record<MealSlot, string> = {
 
 @Component({
   selector: 'app-today-page',
-  imports: [RouterLink],
+  imports: [RouterLink, WorkoutsCard],
   templateUrl: './today.page.html',
   styleUrl: './today.page.scss',
 })
