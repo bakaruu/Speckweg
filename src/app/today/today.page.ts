@@ -1,10 +1,12 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DiaryRow, DiaryService } from '../core/diary/diary.service';
+import { addMacros, NO_MACROS } from '../core/foods/food';
 import { SettingsService } from '../core/settings/settings.service';
 import { isoDate, MEAL_SLOTS, optionsFor, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
 import { MealIdea, MealSlot } from '../planner/meal-catalog';
 import { Amount, gramsFor, macrosFor, PORTION_SIZES } from '../planner/portions';
+import { FoodSearchComponent } from './food-search/food-search.component';
 
 const SLOT_LABELS: Record<MealSlot, string> = {
   desayuno: 'Desayuno',
@@ -22,7 +24,7 @@ interface LogForm {
 
 @Component({
   selector: 'app-today-page',
-  imports: [RouterLink],
+  imports: [RouterLink, FoodSearchComponent],
   templateUrl: './today.page.html',
   styleUrl: './today.page.scss',
 })
@@ -54,12 +56,16 @@ export class TodayPage implements OnInit {
   );
 
   protected readonly entries = signal<DiaryRow[]>([]);
-  protected readonly eaten = computed(() =>
-    this.entries().reduce((acc, e) => ({ kcal: acc.kcal + e.kcal, proteinG: acc.proteinG + e.proteinG }), {
-      kcal: 0,
-      proteinG: 0,
-    }),
+  protected readonly eaten = computed(() => this.entries().reduce(addMacros, NO_MACROS));
+  /** Lo apuntado, agrupado por comida y en orden del día, con el total de cada una. */
+  protected readonly eatenBySlot = computed(() =>
+    MEAL_SLOTS.map((slot) => {
+      const items = this.entries().filter((e) => e.slot === slot);
+      return { slot, items, total: items.reduce(addMacros, NO_MACROS) };
+    }).filter((g) => g.items.length > 0),
   );
+  protected readonly searchOpen = signal(false);
+  protected readonly todayIso = isoDate(this.today);
   protected readonly eatenPct = computed(() =>
     Math.min(100, Math.round((this.eaten().proteinG / this.proteinTarget()) * 100)),
   );
@@ -145,7 +151,7 @@ export class TodayPage implements OnInit {
     await this.loadEntries();
   }
 
-  private async loadEntries(): Promise<void> {
+  protected async loadEntries(): Promise<void> {
     try {
       this.entries.set(await this.diary.entriesFor(isoDate(this.today)));
     } catch (e) {
