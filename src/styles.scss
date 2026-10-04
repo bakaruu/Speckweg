@@ -67,3 +67,21 @@ button:disabled {
 .error {
   color: var(--error);
 }
+
+.card + .card {
+  margin-top: 16px;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+
+.muted {
+  opacity: 0.7;
+}
+
+a {
+  color: var(--accent);
+}

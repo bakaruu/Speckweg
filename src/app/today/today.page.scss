@@ -1,0 +1,90 @@
+.day {
+  max-width: 860px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+header p {
+  margin: 0;
+}
+
+.date {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.target {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.big {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border);
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.hint {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+}
+
+.meals {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.meals li {
+  display: grid;
+  grid-template-columns: 90px 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.slot {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.info,
+.macros {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info .muted {
+  font-size: 0.85rem;
+}
+
+.macros {
+  align-items: flex-end;
+  white-space: nowrap;
+}
+
+.note {
+  font-size: 0.8rem;
+  margin: 8px 0 0;
+}

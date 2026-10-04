@@ -1,0 +1,49 @@
+<h1>Hoy</h1>
+
+<section class="card day">
+  <header>
+    <div>
+      <p class="date">{{ dateLabel }}</p>
+      <p class="muted">Platos recomendados para hoy</p>
+    </div>
+    <div class="target">
+      <span class="big">{{ total().proteinG }} / {{ proteinTarget() }} g</span>
+      <span class="muted">proteína · {{ total().kcal }} kcal</span>
+    </div>
+  </header>
+
+  <div class="bar" role="progressbar" [attr.aria-valuenow]="proteinPct()" aria-valuemin="0" aria-valuemax="100">
+    <div class="fill" [style.width.%]="proteinPct()"></div>
+  </div>
+
+  @if (weightKg() === undefined) {
+    <p class="muted hint">
+      Objetivo orientativo de {{ proteinTarget() }} g. Pon tu peso en <a routerLink="/ajustes">Ajustes</a> para
+      calcularlo bien.
+    </p>
+  } @else if (total().proteinG < proteinTarget()) {
+    <p class="muted hint">
+      Te faltan {{ proteinTarget() - total().proteinG }} g de proteína: añade otro batido de soja (unos 26 g por
+      cacito) o una ración más grande en la comida.
+    </p>
+  }
+
+  <ul class="meals">
+    @for (item of meals(); track item.slot) {
+      <li>
+        <div class="slot">{{ slotLabels[item.slot] }}</div>
+        <div class="info">
+          <strong>{{ item.meal.name }}</strong>
+          <span class="muted">{{ item.meal.ingredients }}</span>
+        </div>
+        <div class="macros">
+          <strong>{{ item.meal.proteinG }} g</strong>
+          <span class="muted">{{ item.meal.kcal }} kcal</span>
+        </div>
+        <button class="secondary" (click)="another(item.slot)" title="Otra sugerencia">Otra</button>
+      </li>
+    }
+  </ul>
+
+  <p class="muted note">Valores aproximados por ración.</p>
+</section>

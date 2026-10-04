@@ -21,4 +21,14 @@ export class SettingsService {
     // Guardado explícito en disco, sin depender del autoguardado diferido.
     await store.save();
   }
+
+  async getWeightKg(): Promise<number | undefined> {
+    return (await this.open()).get<number>('weightKg');
+  }
+
+  async setWeightKg(kg: number): Promise<void> {
+    const store = await this.open();
+    await store.set('weightKg', kg);
+    await store.save();
+  }
 }

@@ -8,7 +8,7 @@ describe('SettingsPage', () => {
     await TestBed.configureTestingModule({
       imports: [SettingsPage],
       providers: [
-        { provide: SettingsService, useValue: { getHevyApiKey: () => new Promise((r) => setTimeout(() => r('clave-guardada'), 10)), setHevyApiKey: async () => {} } },
+        { provide: SettingsService, useValue: { getHevyApiKey: () => new Promise((r) => setTimeout(() => r('clave-guardada'), 10)), setHevyApiKey: async () => {}, getWeightKg: async () => undefined } },
         { provide: HevyClient, useValue: { countWorkouts: async () => 0 } },
       ],
     }).compileComponents();
@@ -18,7 +18,7 @@ describe('SettingsPage', () => {
     // Como en la app real: nadie fuerza otra detección de cambios, la pantalla debe actualizarse sola.
     await new Promise((r) => setTimeout(r, 100));
 
-    const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
+    const input = (fixture.nativeElement as HTMLElement).querySelector('input[type=password]') as HTMLInputElement;
     expect(input.value).toBe('clave-guardada');
   });
 });
