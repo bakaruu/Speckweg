@@ -1,25 +1,16 @@
 name: Release
 
-# Publica el instalador como Release en GitHub. Se lanza a mano desde
-# Actions → Release → Run workflow, eligiendo:
-#   - prueba: pre-release vX.Y.Z-beta.N (no se marca como la última versión)
-#   - final:  versión vX.Y.Z (usa la versión de src-tauri/tauri.conf.json)
+# Publica la versión final vX.Y.Z (la de src-tauri/tauri.conf.json) desde main.
+# Se lanza a mano: Actions → Release → Run workflow. Solo después de validar la Beta.
 on:
   workflow_dispatch:
-    inputs:
-      tipo:
-        description: 'Tipo de versión'
-        type: choice
-        options:
-          - prueba
-          - final
-        default: prueba
 
 permissions:
   contents: write
 
 jobs:
   windows:
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,9 +33,12 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
         with:
-          tagName: ${{ inputs.tipo == 'final' && 'v__VERSION__' || format('v__VERSION__-beta.{0}', github.run_number) }}
-          releaseName: ${{ inputs.tipo == 'final' && 'Speckweg v__VERSION__' || format('Speckweg v__VERSION__ (prueba {0})', github.run_number) }}
-          releaseBody: 'Descarga **Speckweg_x.y.z_x64-setup.exe**, ábrelo y sigue el asistente. Se crea un acceso directo en el menú Inicio (y en el escritorio si marcas la casilla al final).'
+          tagName: v__VERSION__
+          releaseName: 'Speckweg v__VERSION__'
+          releaseBody: 'Descarga **Speckweg_x.y.z_x64-setup.exe**, ábrelo y sigue el asistente. Si ya tienes Speckweg instalado, la app te avisará al abrirla y se actualiza sola.'
           releaseDraft: false
-          prerelease: ${{ inputs.tipo != 'final' }}
+          prerelease: false
+          includeUpdaterJson: true

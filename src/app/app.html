@@ -1,8 +1,24 @@
 <nav>
-  <span class="brand">Speckweg</span>
+  <span class="brand">
+    Speckweg
+    @if (isBeta()) {
+      <span class="beta">BETA</span>
+    }
+  </span>
   <a routerLink="/hoy" routerLinkActive="active">Hoy</a>
   <a routerLink="/ajustes" routerLinkActive="active">Ajustes</a>
 </nav>
 <main>
+  @if (updates.available(); as update) {
+    <div class="update">
+      <span>Hay una versión nueva: <strong>{{ update.version }}</strong></span>
+      <button (click)="updates.install()" [disabled]="updates.installing()">
+        {{ updates.installing() ? 'Actualizando…' : 'Actualizar' }}
+      </button>
+      @if (updates.error(); as error) {
+        <span class="error">No se pudo actualizar: {{ error }}</span>
+      }
+    </div>
+  }
   <router-outlet />
 </main>
