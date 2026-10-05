@@ -8,7 +8,7 @@ describe('SettingsPage', () => {
     await TestBed.configureTestingModule({
       imports: [SettingsPage],
       providers: [
-        { provide: SettingsService, useValue: { getHevyApiKey: () => new Promise((r) => setTimeout(() => r('clave-guardada'), 10)), setHevyApiKey: async () => {}, getWeightKg: async () => undefined } },
+        { provide: SettingsService, useValue: { getHevyApiKey: () => new Promise((r) => setTimeout(() => r('clave-guardada'), 10)), setHevyApiKey: async () => {}, getWeightKg: async () => undefined, getHealthFilePath: async () => undefined } },
         { provide: HevyClient, useValue: { countWorkouts: async () => 0 } },
       ],
     }).compileComponents();
