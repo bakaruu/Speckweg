@@ -152,3 +152,21 @@ select {
   font-size: 0.8rem;
   margin: 8px 0 0;
 }
+
+.add {
+  margin: 4px 0 12px;
+}
+
+.group {
+  margin-top: 8px;
+}
+
+.group-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0 4px;
+}
+
+.row.entry {
+  grid-template-columns: 1fr auto auto;
+}

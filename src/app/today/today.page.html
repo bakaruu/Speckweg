@@ -107,10 +107,14 @@
   <header>
     <div>
       <h2>Lo que has comido hoy</h2>
+      <p class="muted">
+        {{ eaten().kcal }} kcal · {{ eaten().proteinG }} g proteína · {{ eaten().carbsG }} g hidratos ·
+        {{ eaten().fatG }} g grasa
+      </p>
     </div>
     <div class="target">
       <span class="big">{{ eaten().proteinG }} / {{ proteinTarget() }} g</span>
-      <span class="muted">proteína · {{ eaten().kcal }} kcal</span>
+      <span class="muted">proteína</span>
     </div>
   </header>
 
@@ -122,28 +126,54 @@
     <p class="error">{{ e }}</p>
   }
 
-  @if (entries().length === 0) {
-    <p class="muted">Todavía no has apuntado nada. Pulsa «Apuntar» en un plato de arriba.</p>
+  @if (searchOpen()) {
+    <app-food-search
+      [date]="todayIso"
+      [slotLabels]="slotLabels"
+      (logged)="loadEntries()"
+      (closed)="searchOpen.set(false)"
+    />
   } @else {
-    <ul class="meals">
-      @for (entry of entries(); track entry.id) {
-        <li>
-          <div class="row">
-            <div class="slot">{{ slotLabels[entry.slot] }}</div>
-            <div class="info">
-              <strong>{{ entry.name }}</strong>
-              <span class="muted">{{ entry.grams }} g</span>
-            </div>
-            <div class="macros">
-              <strong>{{ entry.proteinG }} g</strong>
-              <span class="muted">{{ entry.kcal }} kcal</span>
-            </div>
-            <div class="actions">
-              <button class="secondary" (click)="removeEntry(entry.id)" title="Quitar">Quitar</button>
-            </div>
-          </div>
-        </li>
-      }
-    </ul>
+    <div class="actions add">
+      <button (click)="searchOpen.set(true)">Buscar alimento</button>
+    </div>
+  }
+
+  @if (entries().length === 0) {
+    <p class="muted">
+      Todavía no has apuntado nada. Pulsa «Apuntar» en un plato de arriba o busca un alimento por nombre o código de
+      barras.
+    </p>
+  } @else {
+    @for (group of eatenBySlot(); track group.slot) {
+      <div class="group">
+        <div class="group-head">
+          <span class="slot">{{ slotLabels[group.slot] }}</span>
+          <span class="muted">{{ group.total.kcal }} kcal · {{ group.total.proteinG }} g proteína</span>
+        </div>
+        <ul class="meals">
+          @for (entry of group.items; track entry.id) {
+            <li>
+              <div class="row entry">
+                <div class="info">
+                  <strong>{{ entry.name }}</strong>
+                  <span class="muted">{{ entry.grams }} g</span>
+                </div>
+                <div class="macros">
+                  <strong>{{ entry.kcal }} kcal</strong>
+                  <span class="muted">P {{ entry.proteinG }} · H {{ entry.carbsG }} · G {{ entry.fatG }}</span>
+                </div>
+                <div class="actions">
+                  <button class="secondary" (click)="removeEntry(entry.id)" title="Quitar">Quitar</button>
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+    <p class="muted note">
+      P proteína · H hidratos · G grasa, en gramos. Los platos de la lista de arriba solo llevan kcal y proteína.
+    </p>
   }
 </section>
