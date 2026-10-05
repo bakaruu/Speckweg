@@ -24,6 +24,8 @@ export class TrainingService {
   readonly version = signal(0);
 
   private startup?: Promise<string[]>;
+  private watchingFocus = false;
+  private lastFocusRead = 0;
 
   /**
    * Sincroniza una sola vez al abrir la app: Hevy (si hay API key) y luego las kcal del Apple Watch.
@@ -35,6 +37,25 @@ export class TrainingService {
       return this.refresh(!!(await this.settings.getHevyApiKey()));
     })();
     return this.startup;
+  }
+
+  /**
+   * Al volver a la ventana de la app, vuelve a leer los archivos del Atajo (kcal, peso y gasto del día)
+   * por si se ha ejecutado en el iPhone. Como mucho una vez cada 30 s y sin llamar a Hevy; los errores
+   * se ven al pulsar «Sincronizar».
+   */
+  watchFocus(): void {
+    if (this.watchingFocus || typeof window === 'undefined') {
+      return;
+    }
+    this.watchingFocus = true;
+    window.addEventListener('focus', () => {
+      if (Date.now() - this.lastFocusRead < 30_000) {
+        return;
+      }
+      this.lastFocusRead = Date.now();
+      void this.refresh(false);
+    });
   }
 
   /** Hevy y Apple Watch, uno detrás de otro. Devuelve los mensajes de error, si los hay. */
