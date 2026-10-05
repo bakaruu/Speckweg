@@ -158,35 +158,6 @@ export function balance(input: {
 /** Objetivo de movimiento del Apple Watch de Aru (kcal en actividad al día). */
 export const MOVE_GOAL_KCAL = 800;
 
-export interface DayBar {
-  date: string;
-  /** Inicial del día de la semana ("L", "M"…). */
-  label: string;
-  eatenKcal?: number;
-  spentKcal?: number;
-}
-
-/** Los 7 días anteriores a hoy, del más antiguo al más reciente, con lo comido y lo gastado. */
-export function weekBars(
-  log: EnergyDay[],
-  eatenByDay: Map<string, number>,
-  now = new Date(),
-): DayBar[] {
-  const labels = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
-  const bars: DayBar[] = [];
-  for (let i = 7; i >= 1; i--) {
-    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-    const date = isoDate(day);
-    bars.push({
-      date,
-      label: labels[day.getDay()],
-      eatenKcal: eatenByDay.get(date),
-      spentKcal: spentKcal(log.find((d) => d.date === date)),
-    });
-  }
-  return bars;
-}
-
 /** Parte del anillo que se rellena (0 a 1). */
 export function ringFraction(value: number, goal: number | undefined): number {
   return goal && goal > 0 ? Math.max(0, Math.min(1, value / goal)) : 0;
