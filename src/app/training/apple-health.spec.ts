@@ -50,4 +50,19 @@ describe('Apple Watch', () => {
       ),
     ).toBe(13);
   });
+
+  it('lee el archivo real del Atajo de Aru (iOS 26)', () => {
+    const samples = parseEnergyFile(
+      '3 oct 2026, 0:01;3 oct 2026, 0:11; 17.28599999999999\n3 oct 2026, 0:11;3 oct 2026, 0:21; 27.064\n',
+    );
+    expect(samples.length).toBe(2);
+    expect(samples[0].start).toBe(new Date(2026, 9, 3, 0, 1).getTime());
+    expect(
+      kcalDuring(
+        samples,
+        new Date(2026, 9, 3, 0, 1).toISOString(),
+        new Date(2026, 9, 3, 0, 21).toISOString(),
+      ),
+    ).toBe(44);
+  });
 });
