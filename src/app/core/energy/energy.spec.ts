@@ -9,6 +9,14 @@ describe('parseDailyTotals', () => {
     ]);
   });
 
+  it('lee las líneas reales del Atajo de Aru', () => {
+    const totals = parseDailyTotals(
+      '28 sept 2026, 0:03; 2296.885000000001\n5 oct 2026, 0:13; 1629.429999999994\n',
+    );
+    expect(totals.get('2026-09-28')).toBeCloseTo(2296.885);
+    expect(totals.get('2026-10-05')).toBeCloseTo(1629.43);
+  });
+
   it('suma las muestras sueltas por el día en que empiezan', () => {
     const text = [
       '5 oct 2026, 9:01;5 oct 2026, 9:02; 4.5',
