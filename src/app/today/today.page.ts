@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DiaryRow, DiaryService } from '../core/diary/diary.service';
+import { MenuService } from '../core/menu/menu.service';
 import { SettingsService } from '../core/settings/settings.service';
 import { isoDate, MEAL_SLOTS, optionsFor, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
 import { MealIdea, MealSlot } from '../planner/meal-catalog';
@@ -30,6 +31,7 @@ interface LogForm {
 export class TodayPage implements OnInit {
   private readonly settings = inject(SettingsService);
   private readonly diary = inject(DiaryService);
+  private readonly menu = inject(MenuService);
 
   protected readonly today = new Date();
   protected readonly dateLabel = capitalize(
@@ -39,14 +41,17 @@ export class TodayPage implements OnInit {
   );
   protected readonly slotLabels = SLOT_LABELS;
   protected readonly portionSizes = PORTION_SIZES;
-  protected readonly optionsFor = optionsFor;
+  protected readonly optionsFor = (slot: MealSlot): MealIdea[] => optionsFor(slot, this.menu.meals());
 
   protected readonly weightKg = signal<number | undefined>(undefined);
   /** Cuántas veces se ha pedido "otra sugerencia" para cada comida. */
   private readonly shifts = signal<Record<MealSlot, number>>({ desayuno: 0, comida: 0, merienda: 0, cena: 0 });
 
   protected readonly meals = computed(() =>
-    MEAL_SLOTS.map((slot) => ({ slot, meal: pickMeal(this.today, slot, this.shifts()[slot]) })),
+    MEAL_SLOTS.flatMap((slot) => {
+      const meal = pickMeal(this.today, slot, this.shifts()[slot], this.menu.meals());
+      return meal ? [{ slot, meal }] : [];
+    }),
   );
   protected readonly total = computed(() => totals(this.meals().map((m) => m.meal)));
   protected readonly proteinTarget = computed(() => proteinTargetG(this.weightKg()));
@@ -68,7 +73,7 @@ export class TodayPage implements OnInit {
   protected readonly form = signal<LogForm | null>(null);
   protected readonly formMeal = computed(() => {
     const f = this.form();
-    return f ? optionsFor(f.slot).find((m) => m.id === f.mealId) : undefined;
+    return f ? this.optionsFor(f.slot).find((m) => m.id === f.mealId) : undefined;
   });
   protected readonly formPreview = computed(() => {
     const f = this.form();
@@ -83,6 +88,7 @@ export class TodayPage implements OnInit {
   protected readonly error = signal<string | null>(null);
 
   async ngOnInit(): Promise<void> {
+    void this.menu.load();
     this.weightKg.set(await this.settings.getWeightKg());
     await this.loadEntries();
   }

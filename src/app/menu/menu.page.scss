@@ -1,0 +1,143 @@
+.card {
+  max-width: 860px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+button.selected {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 8px 0;
+}
+
+.editor {
+  border-color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.editor h2 {
+  margin-bottom: 12px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+label.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+select,
+textarea {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+}
+
+.lines {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.lines td {
+  padding: 4px 8px 4px 0;
+}
+
+.lines select {
+  width: 100%;
+}
+
+.amount {
+  width: 80px;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.info,
+.macros {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.macros {
+  align-items: flex-end;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tag {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  vertical-align: middle;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.totals {
+  margin: 12px 0;
+}
+
+.ok {
+  color: var(--accent);
+}
+
+button.danger {
+  color: var(--error);
+}
+
+.reset {
+  margin-top: 24px;
+}

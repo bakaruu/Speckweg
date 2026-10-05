@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { DatabaseService } from '../core/db/database.service';
 import { SettingsService } from '../core/settings/settings.service';
 import { HevyClient, HevyWorkout } from './hevy.client';
+import { parseWeightFile } from '../core/profile/body';
 import { kcalDuring, parseEnergyFile } from './apple-health';
 import { DEFAULT_WEIGHT_KG, estimateKcal, parseHevyCsv, summarize } from './workout';
 
@@ -50,6 +51,11 @@ export class TrainingService {
     } catch (e) {
       errors.push(`No se pudieron leer las kcal del Apple Watch: ${errorText(e)}`);
     }
+    try {
+      await this.syncWeight();
+    } catch (e) {
+      errors.push(`No se pudo leer el peso de Salud: ${errorText(e)}`);
+    }
     return errors;
   }
 
@@ -65,6 +71,28 @@ export class TrainingService {
       return undefined;
     }
     return { path: file.path, updated: await this.applyEnergy(file.content) };
+  }
+
+  /**
+   * Lee el peso que deja el Atajo en peso.txt (la báscula lo manda a Salud) y lo añade al histórico.
+   * Devuelve cuántos pesos se han leído, o undefined si no hay archivo.
+   */
+  async syncWeight(): Promise<number | undefined> {
+    const customPath = await this.settings.getHealthFilePath();
+    const file = await invoke<{ path: string; content: string } | null>('read_health_file', {
+      // Si hay una ruta a mano para energia.txt, peso.txt está en la misma carpeta.
+      customPath: customPath ? customPath.replace(/[^\\/]+$/, 'peso.txt') : null,
+      fileName: 'peso.txt',
+    });
+    if (!file) {
+      return undefined;
+    }
+    const entries = parseWeightFile(file.content);
+    if (entries.length > 0) {
+      await this.settings.addWeights(entries);
+      this.version.update((v) => v + 1);
+    }
+    return entries.length;
   }
 
   /** Igual que syncWatch, pero con un archivo elegido a mano. Devuelve cuántos entrenos han cambiado. */

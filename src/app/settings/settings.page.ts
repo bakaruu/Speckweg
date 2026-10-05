@@ -1,28 +1,17 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../core/settings/settings.service';
-import { PROTEIN_G_PER_KG, proteinTargetG } from '../planner/daily-plan';
+import { ProfileCard } from '../core/profile/profile-card';
 import { UpdateService } from '../core/updates/update.service';
 import { HevyClient } from '../training/hevy.client';
 import { TrainingService } from '../training/training.service';
 
 @Component({
   selector: 'app-settings-page',
-  imports: [FormsModule],
+  imports: [FormsModule, ProfileCard],
   template: `
     <h1>Ajustes</h1>
-    <section class="card">
-      <h2>Tus datos</h2>
-      <p>Con tu peso calculamos la proteína diaria recomendada ({{ proteinPerKg }} g por kg).</p>
-      <label>
-        Peso (kg)
-        <input type="number" min="30" max="250" step="0.1" [(ngModel)]="weightKg" />
-      </label>
-      <button (click)="saveWeight()" [disabled]="!weightKg()">Guardar peso</button>
-      @if (weightMessage(); as m) {
-        <p>{{ m }}</p>
-      }
-    </section>
+    <app-profile-card />
     <section class="card">
       <h2>Hevy</h2>
       <p>Saca tu API key en <strong>hevy.com/settings?developer</strong> (necesita Hevy Pro).</p>
@@ -107,9 +96,6 @@ export class SettingsPage implements OnInit {
   protected readonly updates = inject(UpdateService);
 
   protected readonly apiKey = signal('');
-  protected readonly proteinPerKg = PROTEIN_G_PER_KG;
-  protected readonly weightKg = signal<number | null>(null);
-  protected readonly weightMessage = signal<string | null>(null);
   protected readonly busy = signal(false);
   protected readonly message = signal<{ text: string; error: boolean } | null>(null);
   protected readonly importing = signal(false);
@@ -121,7 +107,6 @@ export class SettingsPage implements OnInit {
   async ngOnInit(): Promise<void> {
     // Es un signal para que la pantalla se actualice al terminar de leer el ajuste (la app no usa zone.js).
     this.apiKey.set((await this.settings.getHevyApiKey()) ?? '');
-    this.weightKg.set((await this.settings.getWeightKg()) ?? null);
     this.healthPath.set((await this.settings.getHealthFilePath()) ?? '');
   }
 
@@ -162,15 +147,6 @@ export class SettingsPage implements OnInit {
     } finally {
       this.watchBusy.set(false);
     }
-  }
-
-  protected async saveWeight(): Promise<void> {
-    const kg = Number(this.weightKg());
-    if (!(kg > 0)) {
-      return;
-    }
-    await this.settings.setWeightKg(kg);
-    this.weightMessage.set(`Guardado. Tu objetivo de proteína es ${proteinTargetG(kg)} g al día.`);
   }
 
   protected async save(): Promise<void> {

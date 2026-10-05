@@ -19,23 +19,31 @@ struct HealthFile {
 }
 
 /// Sitios donde iCloud para Windows suele dejar el archivo del Atajo, del más al menos probable.
-fn health_file_candidates() -> Vec<std::path::PathBuf> {
+fn health_file_candidates(file_name: &str) -> Vec<std::path::PathBuf> {
   let Some(home) = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME")) else {
     return Vec::new();
   };
   let icloud = std::path::PathBuf::from(home).join("iCloudDrive");
   ["iCloud~is~workflow~my~workflows", "Shortcuts", "Atajos", ""]
     .iter()
-    .map(|folder| icloud.join(folder).join("Speckweg").join("energia.txt"))
+    .map(|folder| icloud.join(folder).join("Speckweg").join(file_name))
     .collect()
 }
 
 /// Lee el archivo del Atajo: el de la ruta indicada en Ajustes o, si no hay, el primero que exista en iCloud Drive.
 #[tauri::command]
-fn read_health_file(custom_path: Option<String>) -> Result<Option<HealthFile>, String> {
+fn read_health_file(
+  custom_path: Option<String>,
+  file_name: Option<String>,
+) -> Result<Option<HealthFile>, String> {
+  // Solo un nombre de archivo dentro de la carpeta Speckweg, nunca una ruta.
+  let file_name = file_name.unwrap_or_else(|| "energia.txt".to_string());
+  if file_name.contains(['/', '\\']) || file_name.contains("..") {
+    return Err(format!("Nombre de archivo no válido: {file_name}"));
+  }
   let candidates = match custom_path.filter(|p| !p.trim().is_empty()) {
     Some(path) => vec![std::path::PathBuf::from(path.trim())],
-    None => health_file_candidates(),
+    None => health_file_candidates(&file_name),
   };
   for path in candidates {
     if path.is_file() {
