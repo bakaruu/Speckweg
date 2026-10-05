@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { DatabaseService } from '../core/db/database.service';
 import { SettingsService } from '../core/settings/settings.service';
 import { HevyClient, HevyWorkout } from './hevy.client';
+import { mergeEnergy, parseDailyTotals, withoutFirstDay } from '../core/energy/energy';
 import { parseWeightFile } from '../core/profile/body';
 import { kcalDuring, parseEnergyFile } from './apple-health';
 import { DEFAULT_WEIGHT_KG, estimateKcal, parseHevyCsv, summarize } from './workout';
@@ -56,6 +57,11 @@ export class TrainingService {
     } catch (e) {
       errors.push(`No se pudo leer el peso de Salud: ${errorText(e)}`);
     }
+    try {
+      await this.syncEnergyDays();
+    } catch (e) {
+      errors.push(`No se pudo leer el gasto del día de Salud: ${errorText(e)}`);
+    }
     return errors;
   }
 
@@ -93,6 +99,41 @@ export class TrainingService {
       this.version.update((v) => v + 1);
     }
     return entries.length;
+  }
+
+  /**
+   * Lee el gasto de cada día que deja el Atajo: reposo.txt (energía en reposo) y actividad.txt
+   * (energía en actividad). Sin actividad.txt, suma las muestras de energia.txt.
+   * Devuelve cuántos días se han leído, o undefined si no hay ningún archivo.
+   */
+  async syncEnergyDays(): Promise<number | undefined> {
+    const resting = await this.readHealthFile('reposo.txt');
+    const active = await this.readHealthFile('actividad.txt');
+    const samples = active === undefined ? await this.readHealthFile('energia.txt') : undefined;
+    if (resting === undefined && active === undefined && samples === undefined) {
+      return undefined;
+    }
+    let log = await this.settings.getEnergyLog();
+    const restingDays = parseDailyTotals(resting ?? '');
+    const activeDays =
+      active !== undefined
+        ? parseDailyTotals(active)
+        : withoutFirstDay(parseDailyTotals(samples ?? ''));
+    log = mergeEnergy(log, restingDays, 'restingKcal');
+    log = mergeEnergy(log, activeDays, 'activeKcal');
+    await this.settings.setEnergyLog(log);
+    this.version.update((v) => v + 1);
+    return new Set([...restingDays.keys(), ...activeDays.keys()]).size;
+  }
+
+  /** Un archivo de la carpeta Speckweg del Atajo (o de la carpeta de la ruta puesta a mano). */
+  private async readHealthFile(fileName: string): Promise<string | undefined> {
+    const customPath = await this.settings.getHealthFilePath();
+    const file = await invoke<{ path: string; content: string } | null>('read_health_file', {
+      customPath: customPath ? customPath.replace(/[^\\/]+$/, fileName) : null,
+      fileName,
+    });
+    return file?.content;
   }
 
   /** Igual que syncWatch, pero con un archivo elegido a mano. Devuelve cuántos entrenos han cambiado. */

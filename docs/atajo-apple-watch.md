@@ -74,3 +74,19 @@ Si la app de tu báscula manda el peso a Salud, añade al final del mismo Atajo 
 
 Cada vez que se ejecuta guarda tu último peso (`5 oct 2026, 8:10;72,4 kg`). Speckweg lo añade a tu histórico al abrirse y
 lo usa para la proteína, las kcal del día y las de los entrenos.
+
+## 7. Gasto del día (reposo y actividad)
+
+Para el balance de Hoy (kcal comidas frente a gastadas), añade al final del mismo Atajo:
+
+1. **Buscar muestras médicas** · Tipo **Energía en reposo** · filtro **Fecha de inicio** · **está en los últimos** · **7 días** · **Agrupar por** **Día**.
+2. **Repetir con cada** elemento de «Muestras médicas».
+3. Dentro, **Texto**: «Ítem de repetición» → **Fecha de inicio** (Formato de hora: **Corto**), escribe `;`, «Ítem de repetición» → **Valor**.
+4. Después de «Terminar repetición»: **Combinar texto** con «Resultados de repetición», separador **Nueva línea**.
+5. **Guardar archivo** con el «Texto combinado» · desactiva «Preguntar dónde guardar» · Subruta `/Speckweg/reposo.txt` · activa «Sobrescribir si el archivo existe».
+
+Repite los 5 pasos (o duplícalos) con Tipo **Energía en actividad** y Subruta `/Speckweg/actividad.txt`.
+En la copia, comprueba que «Repetir con cada» usa las muestras de la segunda búsqueda.
+
+Cada línea queda así (un día por línea): `5 oct 2026, 0:00;1650.3`. Si no encuentras «Agrupar por», funciona
+igual sin agrupar: Speckweg suma las muestras de cada día. Sin `actividad.txt`, usa las de `energia.txt`.
