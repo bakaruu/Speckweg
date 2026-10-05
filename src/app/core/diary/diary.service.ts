@@ -62,6 +62,17 @@ export class DiaryService {
     }));
   }
 
+  /** Kcal comidas por día entre dos fechas (YYYY-MM-DD, ambas incluidas). Solo los días con algo apuntado. */
+  async kcalByDay(from: string, to: string): Promise<Map<string, number>> {
+    const rows = await this.db.select<{ date: string; kcal: number }>(
+      `SELECT e.date, SUM(f.kcal_100g * e.grams / 100) AS kcal
+       FROM diary_entry e JOIN food f ON f.id = e.food_id
+       WHERE e.date >= $1 AND e.date <= $2 GROUP BY e.date`,
+      [from, to],
+    );
+    return new Map(rows.map((r) => [r.date, Math.round(r.kcal)]));
+  }
+
   async remove(id: number): Promise<void> {
     await this.db.execute(`DELETE FROM diary_entry WHERE id = $1`, [id]);
   }
