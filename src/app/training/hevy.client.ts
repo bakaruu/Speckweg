@@ -65,14 +65,15 @@ export class HevyClient {
     const events: HevyWorkoutEvent[] = [];
     for (let page = 1; ; page++) {
       const query = `page=${page}&pageSize=${PAGE_SIZE}&since=${encodeURIComponent(since)}`;
-      const body = await this.get<{ page_count: number; events: HevyWorkoutEvent[] }>(
+      const body = await this.get<unknown>(
         `/workouts/events?${query}`,
         undefined,
         // Hevy responde 404 cuando no hay nada nuevo.
         { page_count: 0, events: [] },
       );
-      events.push(...body.events);
-      if (page >= body.page_count) {
+      const result = readEventsPage(body);
+      events.push(...result.events);
+      if (page >= result.pageCount) {
         return events;
       }
     }
@@ -95,6 +96,38 @@ export class HevyClient {
     if (!response.ok) {
       throw new Error(`Hevy respondió ${response.status}.`);
     }
-    return response.json() as Promise<T>;
+    // Algunas respuestas sin cambios llegan con el cuerpo vacío.
+    const text = await response.text();
+    return (text.trim() ? JSON.parse(text) : {}) as T;
   }
+}
+
+/**
+ * Lee una página de /workouts/events sin fiarse de su forma: sin cambios Hevy puede responder
+ * sin `events`, con el cuerpo vacío o con una lista suelta.
+ */
+export function readEventsPage(body: unknown): { events: HevyWorkoutEvent[]; pageCount: number } {
+  if (Array.isArray(body)) {
+    return { events: body.filter(isEvent), pageCount: 1 };
+  }
+  if (!body || typeof body !== 'object') {
+    return { events: [], pageCount: 0 };
+  }
+  const data = body as Record<string, unknown>;
+  const list = data['events'] ?? data['workout_events'] ?? data['data'];
+  const events = Array.isArray(list) ? list.filter(isEvent) : [];
+  const pageCount =
+    typeof data['page_count'] === 'number' ? data['page_count'] : events.length > 0 ? 1 : 0;
+  return { events, pageCount };
+}
+
+function isEvent(value: unknown): value is HevyWorkoutEvent {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const event = value as Record<string, unknown>;
+  return (
+    (event['type'] === 'updated' && !!event['workout'] && typeof event['workout'] === 'object') ||
+    (event['type'] === 'deleted' && typeof event['id'] === 'string')
+  );
 }
