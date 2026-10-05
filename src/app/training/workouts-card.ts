@@ -182,6 +182,7 @@ export class WorkoutsCard {
       void this.load();
     });
     void this.start();
+    this.training.watchFocus();
   }
 
   private async start(): Promise<void> {
