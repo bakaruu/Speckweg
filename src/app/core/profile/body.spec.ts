@@ -33,4 +33,8 @@ describe('body', () => {
       { date: '2026-10-05', kg: 72.4, source: 'salud' },
     ]);
   });
+
+  it('lee el peso.txt real del Atajo de Aru', () => {
+    expect(parseWeightFile('8 sept 2026, 0:00; 97.5')).toEqual([{ date: '2026-09-08', kg: 97.5, source: 'salud' }]);
+  });
 });
