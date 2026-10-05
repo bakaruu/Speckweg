@@ -63,3 +63,14 @@ en hora con datos del reloj muestra «kcal del Apple Watch» en vez de la estima
 
 Si no lo encuentra, ve a **Ajustes → Apple Watch**: pulsa «Leer ahora» para ver qué pasa, pon la ruta
 del archivo a mano o elígelo con el botón de archivo.
+
+## 6. Peso de la báscula
+
+Si la app de tu báscula manda el peso a Salud, añade al final del mismo Atajo «Speckweg kcal»:
+
+1. **Buscar muestras médicas** · Tipo **Peso** · Ordenar por **Fecha de inicio**, **Más reciente primero** · **Límite** activado, **1**.
+2. **Texto**: variable «Muestras médicas» → **Fecha de inicio** (Formato de hora: **Corto**), escribe `;`, variable «Muestras médicas» → **Valor**.
+3. **Guardar archivo** con ese Texto · desactiva «Preguntar dónde guardar» · Subruta `/Speckweg/peso.txt` · activa «Sobrescribir si el archivo existe».
+
+Cada vez que se ejecuta guarda tu último peso (`5 oct 2026, 8:10;72,4 kg`). Speckweg lo añade a tu histórico al abrirse y
+lo usa para la proteína, las kcal del día y las de los entrenos.

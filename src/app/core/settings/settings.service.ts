@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { load, Store } from '@tauri-apps/plugin-store';
+import { isoDate } from '../../planner/daily-plan';
+import { addWeight, Profile, WeightEntry } from '../profile/body';
 
 /** Ajustes locales (settings.json en la carpeta de datos de la app). */
 @Injectable({ providedIn: 'root' })
@@ -22,13 +24,40 @@ export class SettingsService {
     await store.save();
   }
 
+  /** Peso actual: el último del histórico (a mano o de Salud). */
   async getWeightKg(): Promise<number | undefined> {
-    return (await this.open()).get<number>('weightKg');
+    const log = await this.getWeightLog();
+    return log.at(-1)?.kg ?? (await this.open()).get<number>('weightKg');
   }
 
+  /** Apunta el peso de hoy a mano. */
   async setWeightKg(kg: number): Promise<void> {
+    await this.addWeights([{ date: isoDate(new Date()), kg, source: 'manual' }]);
+  }
+
+  async getWeightLog(): Promise<WeightEntry[]> {
+    return (await (await this.open()).get<WeightEntry[]>('weightLog')) ?? [];
+  }
+
+  /** Añade pesos al histórico (uno por día; el nuevo sustituye al de ese día). */
+  async addWeights(entries: WeightEntry[]): Promise<void> {
     const store = await this.open();
-    await store.set('weightKg', kg);
+    let log = await this.getWeightLog();
+    for (const entry of entries) {
+      log = addWeight(log, entry);
+    }
+    await store.set('weightLog', log);
+    await store.set('weightKg', log.at(-1)?.kg);
+    await store.save();
+  }
+
+  async getProfile(): Promise<Profile> {
+    return (await (await this.open()).get<Profile>('profile')) ?? {};
+  }
+
+  async setProfile(profile: Profile): Promise<void> {
+    const store = await this.open();
+    await store.set('profile', profile);
     await store.save();
   }
 
