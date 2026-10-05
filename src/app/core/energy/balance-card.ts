@@ -5,14 +5,14 @@ import { TrainingService } from '../../training/training.service';
 import { DiaryService } from '../diary/diary.service';
 import { GOALS, Profile } from '../profile/body';
 import { SettingsService } from '../settings/settings.service';
-import { balance, EnergyDay, MOVE_GOAL_KCAL, ringFraction, weekBars } from './energy';
+import { balance, EnergyDay, MOVE_GOAL_KCAL, ringFraction } from './energy';
 
 /** Radio de cada anillo, de fuera a dentro: comida, proteína y movimiento. */
 const RINGS = [52, 39, 26];
 
 /**
  * Resumen de Hoy al estilo de los anillos del reloj: comida, proteína y movimiento, lo gastado
- * según Salud, lo que queda para el objetivo y la última semana comido frente a gastado.
+ * según Salud y lo que queda para el objetivo.
  */
 @Component({
   selector: 'app-balance-card',
@@ -75,12 +75,18 @@ const RINGS = [52, 39, 26];
             }
           </div>
           <div>
-            <span class="muted">Te quedan</span>
-            @if (b().remainingKcal !== undefined) {
+            @if (b().remainingKcal !== undefined && b().targetKcal) {
+              <span class="muted">{{
+                b().remainingKcal! < 0 ? 'Te has pasado comiendo' : 'Te quedan por comer'
+              }}</span>
               <strong [class.over]="b().remainingKcal! < 0"
-                >{{ n(b().remainingKcal!) }} <small>kcal</small></strong
+                >{{ n(abs(b().remainingKcal!)) }} <small>kcal</small></strong
+              >
+              <span class="muted small"
+                >de {{ n(b().targetKcal!) }} kcal para «{{ goalLabel() }}»</span
               >
             } @else {
+              <span class="muted">Te quedan por comer</span>
               <strong>—</strong>
             }
           </div>
@@ -110,24 +116,6 @@ const RINGS = [52, 39, 26];
         </p>
       }
 
-      @if (hasWeek()) {
-        <h3>Últimos 7 días</h3>
-        <div class="week" role="img" aria-label="Comido frente a gastado en los últimos 7 días">
-          @for (d of week(); track d.date) {
-            <div class="day" [title]="dayTitle(d)">
-              <div class="bars">
-                <span class="bar eaten" [style.height.%]="pct(d.eatenKcal)"></span>
-                <span class="bar spent" [style.height.%]="pct(d.spentKcal)"></span>
-              </div>
-              <span class="muted small">{{ d.label }}</span>
-            </div>
-          }
-        </div>
-        <p class="small key">
-          <span class="dot eaten"></span> comido <span class="dot spent"></span> gastado
-        </p>
-      }
-
       @if (b().yesterday; as y) {
         <p class="small">
           Ayer comiste {{ n(y.eatenKcal) }} kcal y gastaste {{ n(y.spentKcal) }}:
@@ -147,10 +135,6 @@ const RINGS = [52, 39, 26];
     h2 {
       margin: 0;
       font-size: 1.2rem;
-    }
-    h3 {
-      margin: 16px 0 8px;
-      font-size: 1rem;
     }
     .top {
       display: flex;
@@ -228,48 +212,6 @@ const RINGS = [52, 39, 26];
     .small {
       font-size: 0.85rem;
     }
-    .week {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      height: 110px;
-    }
-    .day {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-    .bars {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 3px;
-    }
-    .bar {
-      width: 10px;
-      border-radius: 3px 3px 0 0;
-    }
-    .eaten {
-      background: var(--comida);
-    }
-    .spent {
-      background: var(--movimiento);
-    }
-    .key {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 6px;
-    }
-    .dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-    }
   `,
 })
 export class BalanceCard {
@@ -326,15 +268,6 @@ export class BalanceCard {
       } kcal`,
   );
 
-  protected readonly week = computed(() => weekBars(this.log(), this.eatenByDay()));
-  protected readonly hasWeek = computed(() =>
-    this.week().some((d) => d.eatenKcal !== undefined || d.spentKcal !== undefined),
-  );
-  /** Escala de las barras: el valor más alto de la semana. */
-  private readonly weekMax = computed(() =>
-    Math.max(1, ...this.week().flatMap((d) => [d.eatenKcal ?? 0, d.spentKcal ?? 0])),
-  );
-
   constructor() {
     // Se vuelve a leer cuando la sincronización trae datos nuevos de Salud.
     effect(() => {
@@ -348,20 +281,8 @@ export class BalanceCard {
     this.profile.set(await this.settings.getProfile());
     this.weightKg.set(await this.settings.getWeightKg());
     const now = new Date();
-    const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
-    this.eatenByDay.set(await this.diary.kcalByDay(isoDate(weekAgo), isoDate(now)));
-  }
-
-  protected pct(kcal: number | undefined): number {
-    return kcal ? (kcal / this.weekMax()) * 100 : 0;
-  }
-
-  protected dayTitle(d: { date: string; eatenKcal?: number; spentKcal?: number }): string {
-    const eaten =
-      d.eatenKcal !== undefined ? `${this.n(d.eatenKcal)} comidas` : 'sin comidas apuntadas';
-    const spent =
-      d.spentKcal !== undefined ? `${this.n(d.spentKcal)} gastadas` : 'sin datos del reloj';
-    return `${d.date}: ${eaten}, ${spent}`;
+    const yesterday = isoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+    this.eatenByDay.set(await this.diary.kcalByDay(yesterday, yesterday));
   }
 
   protected n(kcal: number): string {

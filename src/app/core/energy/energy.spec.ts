@@ -4,7 +4,6 @@ import {
   mergeEnergy,
   parseDailyTotals,
   ringFraction,
-  weekBars,
   withoutFirstDay,
 } from './energy';
 
@@ -71,7 +70,7 @@ describe('balance', () => {
     sex: 'hombre' as const,
     heightCm: 180,
     birthYear: 1995,
-    goal: 'perder' as const,
+    goal: 'recomposicion' as const,
   };
 
   it('compara lo comido con lo gastado hoy y calcula lo que queda con la media del reloj', () => {
@@ -112,28 +111,6 @@ describe('balance', () => {
     const result = balance({ eatenKcal: 500, log: [], profile: {}, now });
     expect(result.targetKcal).toBeUndefined();
     expect(result.remainingKcal).toBeUndefined();
-  });
-});
-
-describe('weekBars', () => {
-  it('da los 7 días anteriores a hoy con lo comido y lo gastado', () => {
-    const bars = weekBars(
-      [{ date: '2026-10-04', restingKcal: 2394, activeKcal: 664 }],
-      new Map([['2026-10-04', 2100]]),
-      new Date(2026, 9, 5, 15, 0),
-    );
-    expect(bars.map((b) => b.date)).toEqual([
-      '2026-09-28',
-      '2026-09-29',
-      '2026-09-30',
-      '2026-10-01',
-      '2026-10-02',
-      '2026-10-03',
-      '2026-10-04',
-    ]);
-    expect(bars[0].label).toBe('L');
-    expect(bars[6]).toEqual({ date: '2026-10-04', label: 'D', eatenKcal: 2100, spentKcal: 3058 });
-    expect(bars[5].eatenKcal).toBeUndefined();
   });
 });
 

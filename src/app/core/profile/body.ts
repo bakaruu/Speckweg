@@ -2,7 +2,7 @@ import { isoDate } from '../../planner/daily-plan';
 import { parseDate } from '../../training/apple-health';
 
 export type Sex = 'hombre' | 'mujer';
-export type Goal = 'perder' | 'mantener' | 'ganar';
+export type Goal = 'recomposicion' | 'perder' | 'mantener' | 'ganar';
 
 export interface Profile {
   heightCm?: number;
@@ -19,7 +19,9 @@ export interface WeightEntry {
 }
 
 export const GOALS: { goal: Goal; label: string; factor: number }[] = [
-  { goal: 'perder', label: 'Perder grasa', factor: 0.85 },
+  // Déficit moderado con mucha proteína y fuerza: se pierde grasa sin perder músculo (y se gana algo).
+  { goal: 'recomposicion', label: 'Perder grasa y ganar músculo', factor: 0.85 },
+  { goal: 'perder', label: 'Solo perder grasa (más rápido)', factor: 0.8 },
   { goal: 'mantener', label: 'Mantenerme', factor: 1 },
   { goal: 'ganar', label: 'Ganar músculo', factor: 1.1 },
 ];
