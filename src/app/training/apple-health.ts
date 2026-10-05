@@ -32,6 +32,8 @@ export function parseEnergyFile(text: string): EnergySample[] {
   return samples;
 }
 
+const MINUTE = 60_000;
+
 const MONTHS: Record<string, number> = {
   ene: 0,
   jan: 0,
@@ -89,8 +91,10 @@ export function kcalDuring(
   startIso: string,
   endIso: string,
 ): number | undefined {
-  const from = Date.parse(startIso);
-  const to = Date.parse(endIso);
+  // El Atajo escribe las horas sin segundos: se amplía el entreno a minutos enteros para no perder
+  // las muestras del primer y del último minuto.
+  const from = Math.floor(Date.parse(startIso) / MINUTE) * MINUTE;
+  const to = Math.ceil(Date.parse(endIso) / MINUTE) * MINUTE;
   let total = 0;
   let found = false;
   for (const s of samples) {

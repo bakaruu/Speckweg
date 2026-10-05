@@ -65,4 +65,16 @@ describe('Apple Watch', () => {
       ),
     ).toBe(44);
   });
+
+  it('cuenta las muestras del primer minuto aunque el entreno empiece con segundos', () => {
+    const samples = parseEnergyFile(
+      '5 oct 2026, 2:13;5 oct 2026, 2:13; 0.298\n5 oct 2026, 2:13;5 oct 2026, 2:13; 0.243\n5 oct 2026, 2:14;5 oct 2026, 2:14; 0.5\n5 oct 2026, 2:30;5 oct 2026, 2:30; 9',
+    );
+    const kcal = kcalDuring(
+      samples,
+      new Date(2026, 9, 5, 2, 13, 20).toISOString(),
+      new Date(2026, 9, 5, 2, 14, 30).toISOString(),
+    );
+    expect(kcal).toBe(1);
+  });
 });
