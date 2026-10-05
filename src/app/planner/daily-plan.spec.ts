@@ -6,18 +6,18 @@ describe('daily-plan', () => {
 
   it('da el mismo plan para el mismo día', () => {
     for (const slot of MEAL_SLOTS) {
-      expect(pickMeal(day, slot).id).toBe(pickMeal(new Date(2026, 9, 4, 22, 30), slot).id);
+      expect(pickMeal(day, slot)!.id).toBe(pickMeal(new Date(2026, 9, 4, 22, 30), slot)!.id);
     }
   });
 
   it('cambia de plato al día siguiente', () => {
     const next = new Date(2026, 9, 5);
-    expect(pickMeal(next, 'comida').id).not.toBe(pickMeal(day, 'comida').id);
+    expect(pickMeal(next, 'comida')!.id).not.toBe(pickMeal(day, 'comida')!.id);
   });
 
   it('recorre todas las opciones al pedir otra sugerencia', () => {
     const options = optionsFor('cena');
-    const seen = new Set(options.map((_, i) => pickMeal(day, 'cena', i).id));
+    const seen = new Set(options.map((_, i) => pickMeal(day, 'cena', i)!.id));
     expect(seen.size).toBe(options.length);
   });
 
