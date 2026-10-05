@@ -6,6 +6,7 @@ import { SettingsService } from '../core/settings/settings.service';
 import { isoDate, MEAL_SLOTS, optionsFor, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
 import { MealIdea, MealSlot } from '../planner/meal-catalog';
 import { Amount, gramsFor, macrosFor, PORTION_SIZES } from '../planner/portions';
+import { WorkoutsCard } from '../training/workouts-card';
 import { FoodSearchComponent } from './food-search/food-search.component';
 
 const SLOT_LABELS: Record<MealSlot, string> = {
@@ -24,7 +25,7 @@ interface LogForm {
 
 @Component({
   selector: 'app-today-page',
-  imports: [RouterLink, FoodSearchComponent],
+  imports: [RouterLink, WorkoutsCard, FoodSearchComponent],
   templateUrl: './today.page.html',
   styleUrl: './today.page.scss',
 })
