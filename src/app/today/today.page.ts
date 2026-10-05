@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DiaryRow, DiaryService } from '../core/diary/diary.service';
+import { BalanceCard } from '../core/energy/balance-card';
 import { MenuService } from '../core/menu/menu.service';
 import { SettingsService } from '../core/settings/settings.service';
 import { isoDate, MEAL_SLOTS, optionsFor, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
@@ -24,7 +25,7 @@ interface LogForm {
 
 @Component({
   selector: 'app-today-page',
-  imports: [RouterLink, WorkoutsCard],
+  imports: [RouterLink, BalanceCard, WorkoutsCard],
   templateUrl: './today.page.html',
   styleUrl: './today.page.scss',
 })

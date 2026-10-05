@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { load, Store } from '@tauri-apps/plugin-store';
 import { isoDate } from '../../planner/daily-plan';
+import { EnergyDay } from '../energy/energy';
 import { addWeight, Profile, WeightEntry } from '../profile/body';
 
 /** Ajustes locales (settings.json en la carpeta de datos de la app). */
@@ -58,6 +59,17 @@ export class SettingsService {
   async setProfile(profile: Profile): Promise<void> {
     const store = await this.open();
     await store.set('profile', profile);
+    await store.save();
+  }
+
+  /** Gasto de cada día según Salud (energía en reposo y en actividad). */
+  async getEnergyLog(): Promise<EnergyDay[]> {
+    return (await (await this.open()).get<EnergyDay[]>('energyLog')) ?? [];
+  }
+
+  async setEnergyLog(log: EnergyDay[]): Promise<void> {
+    const store = await this.open();
+    await store.set('energyLog', log);
     await store.save();
   }
 
