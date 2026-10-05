@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../core/settings/settings.service';
 import { ProfileCard } from '../core/profile/profile-card';
+import { UpdateService } from '../core/updates/update.service';
 import { HevyClient } from '../training/hevy.client';
 import { TrainingService } from '../training/training.service';
 
@@ -57,12 +58,42 @@ import { TrainingService } from '../training/training.service';
       <p>O elige el archivo a mano:</p>
       <input type="file" accept=".txt,.csv,text/plain" (change)="importEnergy($event)" [disabled]="watchBusy()" />
     </section>
+    <section class="card">
+      <h2>Actualizaciones</h2>
+      <p>
+        {{ updates.appName() }} versión <strong>{{ updates.version() ?? '—' }}</strong>.
+        Se buscan versiones nuevas al abrir la app y cada 30 minutos.
+      </p>
+      @switch (updates.status()) {
+        @case ('checking') {
+          <p>Buscando…</p>
+        }
+        @case ('up-to-date') {
+          <p>Estás en la última versión.</p>
+        }
+        @case ('available') {
+          <p>Hay una versión nueva: <strong>{{ updates.available()?.version }}</strong></p>
+          <button (click)="updates.install()" [disabled]="updates.installing()">
+            {{ updates.installing() ? 'Actualizando…' : 'Actualizar' }}
+          </button>
+        }
+      }
+      @if (updates.error(); as error) {
+        <p class="error">No se pudo comprobar o instalar la actualización: {{ error }}</p>
+      }
+      @if (updates.status() !== 'available') {
+        <button class="secondary" (click)="updates.checkNow()" [disabled]="updates.status() === 'checking'">
+          Buscar actualizaciones
+        </button>
+      }
+    </section>
   `,
 })
 export class SettingsPage implements OnInit {
   private readonly settings = inject(SettingsService);
   private readonly hevy = inject(HevyClient);
   private readonly training = inject(TrainingService);
+  protected readonly updates = inject(UpdateService);
 
   protected readonly apiKey = signal('');
   protected readonly busy = signal(false);
