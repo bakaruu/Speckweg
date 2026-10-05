@@ -23,16 +23,19 @@ function dayNumber(date: Date): number {
   return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000);
 }
 
-export function optionsFor(slot: MealSlot): MealIdea[] {
-  return MEAL_CATALOG.filter((m) => m.slot === slot);
+export function optionsFor(slot: MealSlot, catalog: MealIdea[] = MEAL_CATALOG): MealIdea[] {
+  return catalog.filter((m) => m.slot === slot);
 }
 
 /**
  * Elige un plato por comida para la fecha dada. `shift` permite pedir otra sugerencia
  * para una comida concreta sin cambiar el resto.
  */
-export function pickMeal(date: Date, slot: MealSlot, shift = 0): MealIdea {
-  const options = optionsFor(slot);
+export function pickMeal(date: Date, slot: MealSlot, shift = 0, catalog: MealIdea[] = MEAL_CATALOG): MealIdea | undefined {
+  const options = optionsFor(slot, catalog);
+  if (options.length === 0) {
+    return undefined;
+  }
   // Cada comida rota con un desfase distinto para que no cambien todas a la vez.
   const offset = MEAL_SLOTS.indexOf(slot) * 3;
   const index = (((dayNumber(date) + offset + shift) % options.length) + options.length) % options.length;
