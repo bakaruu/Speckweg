@@ -70,7 +70,7 @@ describe('balance', () => {
     sex: 'hombre' as const,
     heightCm: 180,
     birthYear: 1995,
-    goal: 'perder' as const,
+    goal: 'recomposicion' as const,
   };
 
   it('compara lo comido con lo gastado hoy y calcula lo que queda con la media del reloj', () => {
