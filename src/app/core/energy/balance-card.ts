@@ -75,12 +75,18 @@ const RINGS = [52, 39, 26];
             }
           </div>
           <div>
-            <span class="muted">Te quedan</span>
-            @if (b().remainingKcal !== undefined) {
+            @if (b().remainingKcal !== undefined && b().targetKcal) {
+              <span class="muted">{{
+                b().remainingKcal! < 0 ? 'Te has pasado comiendo' : 'Te quedan por comer'
+              }}</span>
               <strong [class.over]="b().remainingKcal! < 0"
-                >{{ n(b().remainingKcal!) }} <small>kcal</small></strong
+                >{{ n(abs(b().remainingKcal!)) }} <small>kcal</small></strong
+              >
+              <span class="muted small"
+                >de {{ n(b().targetKcal!) }} kcal para «{{ goalLabel() }}»</span
               >
             } @else {
+              <span class="muted">Te quedan por comer</span>
               <strong>—</strong>
             }
           </div>
