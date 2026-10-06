@@ -1,27 +1,27 @@
 import { MEAL_CATALOG } from './meal-catalog';
-import { gramsFor, macrosFor } from './portions';
+import { foodGrams, macrosFor, parseGrams } from './portions';
 
 describe('portions', () => {
   const lentejas = MEAL_CATALOG.find((m) => m.id === 'lentejas')!;
 
-  it('la ración normal da los valores del catálogo', () => {
-    const grams = gramsFor(lentejas, { kind: 'size', size: 'normal' });
-    expect(grams).toBe(lentejas.portionG);
-    expect(macrosFor(lentejas, grams)).toEqual({ kcal: lentejas.kcal, proteinG: lentejas.proteinG });
+  it('la ración habitual da los valores del catálogo', () => {
+    expect(macrosFor(lentejas, lentejas.portionG)).toEqual({ kcal: lentejas.kcal, proteinG: lentejas.proteinG });
   });
 
-  it('una ración grande suma más que una pequeña', () => {
-    const small = macrosFor(lentejas, gramsFor(lentejas, { kind: 'size', size: 'pequena' }));
-    const big = macrosFor(lentejas, gramsFor(lentejas, { kind: 'size', size: 'grande' }));
-    expect(big.kcal).toBeGreaterThan(lentejas.kcal);
-    expect(small.kcal).toBeLessThan(lentejas.kcal);
-  });
-
-  it('en gramos escala según el peso de la ración', () => {
-    expect(gramsFor(lentejas, { kind: 'grams', grams: 200 })).toBe(200);
-    expect(macrosFor(lentejas, 200)).toEqual({
+  it('escala según los gramos', () => {
+    expect(macrosFor(lentejas, lentejas.portionG / 2)).toEqual({
       kcal: Math.round(lentejas.kcal / 2),
       proteinG: Math.round(lentejas.proteinG / 2),
     });
+  });
+
+  it('resta el peso del recipiente a lo que marca la báscula', () => {
+    expect(foodGrams(720, 320)).toBe(400);
+    expect(foodGrams(300, 320)).toBe(0);
+  });
+
+  it('acepta coma decimal', () => {
+    expect(parseGrams('312,5')).toBe(312.5);
+    expect(parseGrams('')).toBeNaN();
   });
 });

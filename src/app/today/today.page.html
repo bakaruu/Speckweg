@@ -100,26 +100,62 @@
             </label>
 
             @if (formMeal(); as meal) {
-              <p class="muted small">¿Cuánto, a ojo? La ración normal es {{ meal.portion }}.</p>
-              <div class="sizes">
-                @for (p of portionSizes; track p.size) {
-                  <button
-                    class="secondary"
-                    [class.selected]="form()?.amount?.kind === 'size' && $any(form()?.amount).size === p.size"
-                    (click)="chooseAmount({ kind: 'size', size: p.size }); grams.value = ''"
-                  >
-                    {{ p.label }} <span class="muted">· {{ sizeKcal(meal, p.size) }} kcal</span>
+              @if (formContainer(); as c) {
+                <label class="grams">
+                  Lo que marca la báscula con «{{ c.name }}»
+                  <input
+                    #scale
+                    type="number"
+                    min="1"
+                    inputmode="numeric"
+                    [placeholder]="'Más de ' + c.grams + ' g'"
+                    (input)="typeScale(scale.value)"
+                  />
+                </label>
+              } @else {
+                <label class="grams">
+                  ¿Cuántos gramos de comida?
+                  <input
+                    #grams
+                    type="number"
+                    min="1"
+                    inputmode="numeric"
+                    [value]="form()?.grams"
+                    (input)="typeGrams(grams.value)"
+                  />
+                </label>
+                <p class="muted small">Tu ración habitual, {{ meal.portion }}, son unos {{ meal.portionG }} g.</p>
+              }
+
+              @if (containers.list().length > 0) {
+                <p class="small">Pesado con…</p>
+                <div class="containers">
+                  <button class="secondary" [class.selected]="!form()?.containerId" (click)="chooseContainer(undefined)">
+                    Sin plato (o con tara)
                   </button>
-                }
-              </div>
-              <label class="grams">
-                O, si lo has pesado, en gramos
-                <input #grams type="number" min="1" inputmode="numeric" placeholder="Opcional" (input)="typeGrams(grams.value)" />
-              </label>
+                  @for (c of containers.list(); track c.id) {
+                    <button
+                      class="secondary container"
+                      [class.selected]="form()?.containerId === c.id"
+                      (click)="chooseContainer(c.id)"
+                    >
+                      @if (c.photo) {
+                        <img [src]="c.photo" alt="" />
+                      }
+                      <span>{{ c.name }} <span class="muted">· {{ c.grams }} g</span></span>
+                    </button>
+                  }
+                </div>
+              } @else {
+                <p class="muted small">
+                  ¿Lo pesas con el plato puesto? Guarda tus platos en <a routerLink="/ajustes">Ajustes → Mis recipientes</a>
+                  y se resta solo.
+                </p>
+              }
 
               @if (formPreview(); as p) {
                 <p>
-                  Se apuntan unos <strong>{{ p.grams }} g</strong>: {{ p.proteinG }} g de proteína · {{ p.kcal }} kcal
+                  Se apuntan <strong>{{ p.grams }} g</strong> de comida: {{ p.proteinG }} g de proteína · {{ p.kcal }} kcal
                 </p>
               }
               <div class="actions">

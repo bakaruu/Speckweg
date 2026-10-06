@@ -6,7 +6,8 @@ import { MenuService } from '../core/menu/menu.service';
 import { SettingsService } from '../core/settings/settings.service';
 import { isoDate, MEAL_SLOTS, optionsFor, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
 import { MealIdea, MealSlot } from '../planner/meal-catalog';
-import { Amount, gramsFor, macrosFor, PORTION_SIZES } from '../planner/portions';
+import { foodGrams, macrosFor, parseGrams } from '../planner/portions';
+import { ContainersService } from '../core/containers/containers.service';
 import { TrainingService } from '../training/training.service';
 import { WorkoutsCard } from '../training/workouts-card';
 import { addDays, startOfDay } from './calendar';
@@ -23,7 +24,12 @@ const SLOT_LABELS: Record<MealSlot, string> = {
 interface LogForm {
   slot: MealSlot;
   mealId: string;
-  amount: Amount;
+  /** Gramos de comida escritos (o la ración habitual del plato al abrir). */
+  grams: number;
+  /** Recipiente con el que se ha pesado, si se ha pesado con el plato puesto. */
+  containerId?: string;
+  /** Lo que marca la báscula con el recipiente. */
+  scaleGrams?: number;
 }
 
 @Component({
@@ -36,6 +42,7 @@ export class TodayPage implements OnInit {
   private readonly settings = inject(SettingsService);
   private readonly diary = inject(DiaryService);
   private readonly menu = inject(MenuService);
+  protected readonly containers = inject(ContainersService);
   private readonly training = inject(TrainingService);
 
   /** Día que se está viendo: hoy, o uno anterior elegido con las flechas o el calendario. */
@@ -59,7 +66,6 @@ export class TodayPage implements OnInit {
   /** Días con comidas, entreno o datos del reloj, para el puntito del calendario. */
   protected readonly marked = signal(new Set<string>());
   protected readonly slotLabels = SLOT_LABELS;
-  protected readonly portionSizes = PORTION_SIZES;
   protected readonly optionsFor = (slot: MealSlot): MealIdea[] => optionsFor(slot, this.menu.meals());
 
   protected readonly weightKg = signal<number | undefined>(undefined);
@@ -94,13 +100,18 @@ export class TodayPage implements OnInit {
     const f = this.form();
     return f ? this.optionsFor(f.slot).find((m) => m.id === f.mealId) : undefined;
   });
+  protected readonly formContainer = computed(() => {
+    const id = this.form()?.containerId;
+    return id ? this.containers.list().find((c) => c.id === id) : undefined;
+  });
   protected readonly formPreview = computed(() => {
     const f = this.form();
     const meal = this.formMeal();
     if (!f || !meal) {
       return undefined;
     }
-    const grams = gramsFor(meal, f.amount);
+    const container = this.formContainer();
+    const grams = container ? foodGrams(f.scaleGrams ?? NaN, container.grams) : f.grams;
     return grams > 0 ? { grams, ...macrosFor(meal, grams) } : undefined;
   });
   protected readonly saving = signal(false);
@@ -120,6 +131,7 @@ export class TodayPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     void this.menu.load();
+    void this.containers.load();
     this.weightKg.set(await this.settings.getWeightKg());
   }
 
@@ -160,33 +172,34 @@ export class TodayPage implements OnInit {
 
   protected openLog(slot: MealSlot, meal: MealIdea): void {
     this.error.set(null);
-    this.form.set({ slot, mealId: meal.id, amount: { kind: 'size', size: 'normal' } });
+    this.form.set({ slot, mealId: meal.id, grams: meal.portionG });
   }
 
   protected closeLog(): void {
     this.form.set(null);
   }
 
+  /** Al cambiar de plato se proponen los gramos de su ración habitual. */
   protected chooseMeal(mealId: string): void {
-    this.form.update((f) => (f ? { ...f, mealId } : f));
-  }
-
-  protected chooseAmount(amount: Amount): void {
-    this.form.update((f) => (f ? { ...f, amount } : f));
+    this.form.update((f) => {
+      const meal = f ? this.optionsFor(f.slot).find((m) => m.id === mealId) : undefined;
+      return f ? { ...f, mealId, grams: meal?.portionG ?? f.grams } : f;
+    });
   }
 
   protected typeGrams(value: string): void {
-    const grams = Number(value.replace(',', '.'));
-    if (value.trim() === '') {
-      this.chooseAmount({ kind: 'size', size: 'normal' });
-    } else if (grams > 0) {
-      this.chooseAmount({ kind: 'grams', grams });
-    }
+    const grams = parseGrams(value);
+    this.form.update((f) => (f ? { ...f, grams } : f));
   }
 
-  /** Lo que ocupa una ración a ojo, para mostrarlo en el botón. */
-  protected sizeKcal(meal: MealIdea, size: (typeof PORTION_SIZES)[number]['size']): number {
-    return macrosFor(meal, gramsFor(meal, { kind: 'size', size })).kcal;
+  /** Recipiente con el que se pesa; vacío = sin recipiente (o con tara). */
+  protected chooseContainer(containerId: string | undefined): void {
+    this.form.update((f) => (f ? { ...f, containerId, scaleGrams: undefined } : f));
+  }
+
+  protected typeScale(value: string): void {
+    const scaleGrams = parseGrams(value);
+    this.form.update((f) => (f ? { ...f, scaleGrams } : f));
   }
 
   protected async saveLog(): Promise<void> {
