@@ -103,16 +103,29 @@ h2 {
   font-size: 0.85rem;
 }
 
-.sizes {
+.containers {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
 }
 
-.sizes button.selected {
+.containers button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.containers button.selected {
   background: var(--accent-soft);
   border-color: var(--accent);
+}
+
+.containers img {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
 }
 
 .grams input {

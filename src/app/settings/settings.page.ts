@@ -2,16 +2,18 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../core/settings/settings.service';
 import { ProfileCard } from '../core/profile/profile-card';
+import { ContainersCard } from '../core/containers/containers-card';
 import { UpdateService } from '../core/updates/update.service';
 import { HevyClient } from '../training/hevy.client';
 import { TrainingService } from '../training/training.service';
 
 @Component({
   selector: 'app-settings-page',
-  imports: [FormsModule, ProfileCard],
+  imports: [FormsModule, ProfileCard, ContainersCard],
   template: `
     <h1>Ajustes</h1>
     <app-profile-card />
+    <app-containers-card />
     <section class="card">
       <h2>Hevy</h2>
       <p>Saca tu API key en <strong>hevy.com/settings?developer</strong> (necesita Hevy Pro).</p>
