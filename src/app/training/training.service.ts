@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
 import { DatabaseService } from '../core/db/database.service';
+import { isoDate } from '../planner/daily-plan';
 import { SettingsService } from '../core/settings/settings.service';
 import { HevyClient, HevyWorkout } from './hevy.client';
 import { mergeEnergy, parseDailyTotals, withoutFirstDay } from '../core/energy/energy';
@@ -245,6 +246,12 @@ export class TrainingService {
       [from.toISOString(), to.toISOString()],
     );
     return rows.map((r) => JSON.parse(r.raw_json) as HevyWorkout);
+  }
+
+  /** Días (YYYY-MM-DD, hora local) con algún entreno guardado. */
+  async workoutDates(): Promise<string[]> {
+    const rows = await this.db.select<{ start_time: string }>(`SELECT start_time FROM workout`);
+    return rows.map((r) => isoDate(new Date(r.start_time)));
   }
 
   /** El último entreno guardado, sea del día que sea. */

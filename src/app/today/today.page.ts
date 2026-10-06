@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DiaryRow, DiaryService } from '../core/diary/diary.service';
 import { BalanceCard } from '../core/energy/balance-card';
@@ -7,7 +7,10 @@ import { SettingsService } from '../core/settings/settings.service';
 import { isoDate, MEAL_SLOTS, optionsFor, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
 import { MealIdea, MealSlot } from '../planner/meal-catalog';
 import { Amount, gramsFor, macrosFor, PORTION_SIZES } from '../planner/portions';
+import { TrainingService } from '../training/training.service';
 import { WorkoutsCard } from '../training/workouts-card';
+import { addDays, startOfDay } from './calendar';
+import { MonthCalendar } from './month-calendar';
 
 const SLOT_LABELS: Record<MealSlot, string> = {
   desayuno: 'Desayuno',
@@ -25,7 +28,7 @@ interface LogForm {
 
 @Component({
   selector: 'app-today-page',
-  imports: [RouterLink, BalanceCard, WorkoutsCard],
+  imports: [RouterLink, BalanceCard, WorkoutsCard, MonthCalendar],
   templateUrl: './today.page.html',
   styleUrl: './today.page.scss',
 })
@@ -33,13 +36,28 @@ export class TodayPage implements OnInit {
   private readonly settings = inject(SettingsService);
   private readonly diary = inject(DiaryService);
   private readonly menu = inject(MenuService);
+  private readonly training = inject(TrainingService);
 
-  protected readonly today = new Date();
-  protected readonly dateLabel = capitalize(
-    new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(
-      this.today,
+  /** Día que se está viendo: hoy, o uno anterior elegido con las flechas o el calendario. */
+  protected readonly date = signal(startOfDay(new Date()));
+  protected readonly todayIso = isoDate(new Date());
+  protected readonly dateIso = computed(() => isoDate(this.date()));
+  protected readonly isToday = computed(() => this.dateIso() === this.todayIso);
+  protected readonly title = computed(() =>
+    this.isToday()
+      ? 'Hoy'
+      : capitalize(new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }).format(this.date())),
+  );
+  protected readonly dateLabel = computed(() =>
+    capitalize(
+      new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(
+        this.date(),
+      ),
     ),
   );
+  protected readonly calendarOpen = signal(false);
+  /** Días con comidas, entreno o datos del reloj, para el puntito del calendario. */
+  protected readonly marked = signal(new Set<string>());
   protected readonly slotLabels = SLOT_LABELS;
   protected readonly portionSizes = PORTION_SIZES;
   protected readonly optionsFor = (slot: MealSlot): MealIdea[] => optionsFor(slot, this.menu.meals());
@@ -50,7 +68,7 @@ export class TodayPage implements OnInit {
 
   protected readonly meals = computed(() =>
     MEAL_SLOTS.flatMap((slot) => {
-      const meal = pickMeal(this.today, slot, this.shifts()[slot], this.menu.meals());
+      const meal = pickMeal(this.date(), slot, this.shifts()[slot], this.menu.meals());
       return meal ? [{ slot, meal }] : [];
     }),
   );
@@ -88,10 +106,52 @@ export class TodayPage implements OnInit {
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
 
+  constructor() {
+    // Al cambiar de día: sus comidas, y se cierran el formulario y las sugerencias cambiadas.
+    effect(() => {
+      this.date();
+      untracked(() => {
+        this.form.set(null);
+        this.shifts.set({ desayuno: 0, comida: 0, merienda: 0, cena: 0 });
+        void this.loadEntries();
+      });
+    });
+  }
+
   async ngOnInit(): Promise<void> {
     void this.menu.load();
     this.weightKg.set(await this.settings.getWeightKg());
-    await this.loadEntries();
+  }
+
+  protected moveDay(days: number): void {
+    const next = addDays(this.date(), days);
+    if (isoDate(next) <= this.todayIso) {
+      this.date.set(next);
+    }
+  }
+
+  protected goToday(): void {
+    this.date.set(startOfDay(new Date()));
+    this.calendarOpen.set(false);
+  }
+
+  protected pickDay(iso: string): void {
+    const [y, m, d] = iso.split('-').map(Number);
+    this.date.set(new Date(y, m - 1, d));
+    this.calendarOpen.set(false);
+  }
+
+  protected async toggleCalendar(): Promise<void> {
+    const open = !this.calendarOpen();
+    this.calendarOpen.set(open);
+    if (open) {
+      const [meals, workouts, energy] = await Promise.all([
+        this.diary.datesWithEntries(),
+        this.training.workoutDates(),
+        this.settings.getEnergyLog(),
+      ]);
+      this.marked.set(new Set([...meals, ...workouts, ...energy.map((e) => e.date)]));
+    }
   }
 
   protected another(slot: MealSlot): void {
@@ -138,7 +198,7 @@ export class TodayPage implements OnInit {
     this.saving.set(true);
     this.error.set(null);
     try {
-      await this.diary.logMeal(isoDate(this.today), meal, preview.grams);
+      await this.diary.logMeal(isoDate(this.date()), meal, preview.grams);
       this.form.set(null);
       await this.loadEntries();
     } catch (e) {
@@ -155,7 +215,7 @@ export class TodayPage implements OnInit {
 
   private async loadEntries(): Promise<void> {
     try {
-      this.entries.set(await this.diary.entriesFor(isoDate(this.today)));
+      this.entries.set(await this.diary.entriesFor(isoDate(this.date())));
     } catch (e) {
       this.error.set(`No se pudo leer el diario: ${e instanceof Error ? e.message : String(e)}`);
     }

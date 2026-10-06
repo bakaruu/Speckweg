@@ -1,14 +1,45 @@
-<h1>Hoy</h1>
+<div class="day-nav">
+  <button class="secondary arrow" (click)="moveDay(-1)" aria-label="Día anterior" title="Día anterior">‹</button>
+  <div class="title-wrap">
+    <button class="title" (click)="toggleCalendar()" [attr.aria-expanded]="calendarOpen()" title="Elegir día">
+      <h1>{{ title() }}</h1>
+      <span class="muted caret">▾</span>
+    </button>
+    @if (calendarOpen()) {
+      <div class="backdrop" (click)="calendarOpen.set(false)"></div>
+      <app-month-calendar
+        class="popover"
+        [start]="date()"
+        [selected]="dateIso()"
+        [max]="todayIso"
+        [marked]="marked()"
+        (pick)="pickDay($event)"
+      />
+    }
+  </div>
+  <button
+    class="secondary arrow"
+    (click)="moveDay(1)"
+    [disabled]="isToday()"
+    aria-label="Día siguiente"
+    title="Día siguiente"
+  >
+    ›
+  </button>
+  @if (!isToday()) {
+    <button class="secondary" (click)="goToday()">Hoy</button>
+  }
+</div>
 
-<app-balance-card [eatenKcal]="eaten().kcal" [eatenProteinG]="eaten().proteinG" />
+<app-balance-card [eatenKcal]="eaten().kcal" [eatenProteinG]="eaten().proteinG" [date]="date()" />
 
-<app-workouts-card />
+<app-workouts-card [date]="date()" />
 
 <section class="card day">
   <header>
     <div>
-      <p class="date">{{ dateLabel }}</p>
-      <p class="muted">Platos recomendados para hoy</p>
+      <p class="date">{{ dateLabel() }}</p>
+      <p class="muted">Platos recomendados para {{ isToday() ? 'hoy' : 'ese día' }}</p>
     </div>
     <div class="target">
       <span class="big">{{ total().proteinG }} / {{ proteinTarget() }} g</span>
@@ -108,7 +139,7 @@
 <section class="card day">
   <header>
     <div>
-      <h2>Lo que has comido hoy</h2>
+      <h2>{{ isToday() ? 'Lo que has comido hoy' : 'Lo que comiste ese día' }}</h2>
     </div>
     <div class="target">
       <span class="big">{{ eaten().proteinG }} / {{ proteinTarget() }} g</span>
