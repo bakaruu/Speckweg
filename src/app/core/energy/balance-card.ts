@@ -64,7 +64,7 @@ const RINGS = [52, 39, 26];
 
         <div class="big">
           <div>
-            <span class="muted">Gastado hoy</span>
+            <span class="muted">{{ isToday() ? 'Gastado hoy' : 'Gastado ese día' }}</span>
             @if (b().today; as t) {
               <strong>{{ n(t.spentKcal) }} <small>kcal</small></strong>
               <span class="muted small"
@@ -76,9 +76,7 @@ const RINGS = [52, 39, 26];
           </div>
           <div>
             @if (b().remainingKcal !== undefined && b().targetKcal) {
-              <span class="muted">{{
-                b().remainingKcal! < 0 ? 'Te has pasado comiendo' : 'Te quedan por comer'
-              }}</span>
+              <span class="muted">{{ remainingLabel() }}</span>
               <strong [class.over]="b().remainingKcal! < 0"
                 >{{ n(abs(b().remainingKcal!)) }} <small>kcal</small></strong
               >
@@ -111,15 +109,20 @@ const RINGS = [52, 39, 26];
       }
       @if (!b().today) {
         <p class="muted small">
-          Aún no hay gasto de hoy de Salud. Ejecuta el Atajo «Speckweg kcal» (▶) y pulsa
-          Sincronizar.
+          @if (isToday()) {
+            Aún no hay gasto de hoy de Salud. Ejecuta el Atajo «Speckweg kcal» (▶) y pulsa
+            Sincronizar.
+          } @else {
+            No hay datos de Salud de ese día.
+          }
         </p>
       }
 
       @if (b().yesterday; as y) {
         <p class="small">
-          Ayer comiste {{ n(y.eatenKcal) }} kcal y gastaste {{ n(y.spentKcal) }}:
-          {{ y.netKcal > 0 ? 'superávit' : 'déficit' }} de {{ n(abs(y.netKcal)) }} kcal.
+          {{ isToday() ? 'Ayer' : 'El día anterior' }} comiste {{ n(y.eatenKcal) }} kcal y gastaste
+          {{ n(y.spentKcal) }}: {{ y.netKcal > 0 ? 'superávit' : 'déficit' }} de
+          {{ n(abs(y.netKcal)) }} kcal.
         </p>
       }
     </section>
@@ -222,6 +225,8 @@ export class BalanceCard {
   /** Kcal y proteína apuntadas hoy en el diario (las pasa Hoy para que se actualice al apuntar). */
   readonly eatenKcal = input(0);
   readonly eatenProteinG = input(0);
+  /** Día que se está viendo en Hoy (por defecto, hoy). */
+  readonly date = input(new Date());
 
   protected readonly moveGoal = MOVE_GOAL_KCAL;
 
@@ -230,16 +235,27 @@ export class BalanceCard {
   private readonly weightKg = signal<number | undefined>(undefined);
   private readonly eatenByDay = signal(new Map<string, number>());
 
+  protected readonly isToday = computed(() => isoDate(this.date()) === isoDate(new Date()));
   protected readonly b = computed(() => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    const d = this.date();
     return balance({
       eatenKcal: this.eatenKcal(),
-      yesterdayEatenKcal: this.eatenByDay().get(isoDate(yesterday)),
+      yesterdayEatenKcal: this.eatenByDay().get(dayBefore(d)),
       log: this.log(),
       profile: this.profile(),
       weightKg: this.weightKg(),
+      // Para un día pasado, «hoy» es ese día ya cerrado.
+      now: this.isToday()
+        ? new Date()
+        : new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59),
     });
+  });
+  protected readonly remainingLabel = computed(() => {
+    const over = (this.b().remainingKcal ?? 0) < 0;
+    if (this.isToday()) {
+      return over ? 'Te has pasado comiendo' : 'Te quedan por comer';
+    }
+    return over ? 'Te pasaste comiendo' : 'Te quedó por comer';
   });
   protected readonly proteinTarget = computed(() => proteinTargetG(this.weightKg()));
   protected readonly goalLabel = computed(
@@ -272,17 +288,16 @@ export class BalanceCard {
     // Se vuelve a leer cuando la sincronización trae datos nuevos de Salud.
     effect(() => {
       this.training.version();
-      void this.load();
+      void this.load(this.date());
     });
   }
 
-  private async load(): Promise<void> {
+  private async load(date: Date): Promise<void> {
     this.log.set(await this.settings.getEnergyLog());
     this.profile.set(await this.settings.getProfile());
     this.weightKg.set(await this.settings.getWeightKg());
-    const now = new Date();
-    const yesterday = isoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
-    this.eatenByDay.set(await this.diary.kcalByDay(yesterday, yesterday));
+    const before = dayBefore(date);
+    this.eatenByDay.set(await this.diary.kcalByDay(before, before));
   }
 
   protected n(kcal: number): string {
@@ -292,4 +307,8 @@ export class BalanceCard {
   protected abs(kcal: number): number {
     return Math.abs(kcal);
   }
+}
+
+function dayBefore(date: Date): string {
+  return isoDate(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1));
 }

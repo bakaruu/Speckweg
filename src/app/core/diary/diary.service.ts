@@ -73,6 +73,12 @@ export class DiaryService {
     return new Map(rows.map((r) => [r.date, Math.round(r.kcal)]));
   }
 
+  /** Días (YYYY-MM-DD) con alguna comida apuntada. */
+  async datesWithEntries(): Promise<string[]> {
+    const rows = await this.db.select<{ date: string }>(`SELECT DISTINCT date FROM diary_entry`);
+    return rows.map((r) => r.date);
+  }
+
   async remove(id: number): Promise<void> {
     await this.db.execute(`DELETE FROM diary_entry WHERE id = $1`, [id]);
   }

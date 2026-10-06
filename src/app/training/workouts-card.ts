@@ -1,6 +1,7 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SettingsService } from '../core/settings/settings.service';
+import { isoDate } from '../planner/daily-plan';
 import { HevyWorkout } from './hevy.client';
 import { TrainingService } from './training.service';
 import { describeSets, estimateKcal, summarize } from './workout';
@@ -12,7 +13,7 @@ import { describeSets, estimateKcal, summarize } from './workout';
   template: `
     <section class="card workouts">
       <header>
-        <h2>Entreno de hoy</h2>
+        <h2>{{ isToday() ? 'Entreno de hoy' : 'Entreno' }}</h2>
         <div class="sync">
           @if (lastSyncLabel(); as label) {
             <span class="muted">{{ label }}</span>
@@ -33,9 +34,13 @@ import { describeSets, estimateKcal, summarize } from './workout';
         </p>
       } @else if (today().length === 0) {
         <p class="muted">
-          Hoy no hay entreno en Hevy.
-          @if (latest(); as w) {
-            El último fue «{{ w.title }}» el {{ dayLabel(w) }}.
+          @if (isToday()) {
+            Hoy no hay entreno en Hevy.
+            @if (latest(); as w) {
+              El último fue «{{ w.title }}» el {{ dayLabel(w) }}.
+            }
+          } @else {
+            Ese día no hubo entreno en Hevy.
           }
         </p>
       }
@@ -145,6 +150,10 @@ export class WorkoutsCard {
   protected readonly training = inject(TrainingService);
   private readonly settings = inject(SettingsService);
 
+  /** Día que se está viendo en Hoy (por defecto, hoy). */
+  readonly date = input(new Date());
+  protected readonly isToday = computed(() => isoDate(this.date()) === isoDate(new Date()));
+
   protected readonly hasKey = signal(true);
   protected readonly workouts = signal<HevyWorkout[]>([]);
   protected readonly latest = signal<HevyWorkout | undefined>(undefined);
@@ -179,7 +188,7 @@ export class WorkoutsCard {
     // Vuelve a leer de la base de datos cada vez que cambian los entrenos guardados.
     effect(() => {
       this.training.version();
-      void this.load();
+      void this.load(this.date());
     });
     void this.start();
     this.training.watchFocus();
@@ -222,9 +231,9 @@ export class WorkoutsCard {
     }).format(new Date(w.start_time));
   }
 
-  private async load(): Promise<void> {
+  private async load(date: Date): Promise<void> {
     try {
-      this.workouts.set(await this.training.workoutsOn(new Date()));
+      this.workouts.set(await this.training.workoutsOn(date));
       this.latest.set(await this.training.latest());
     } catch (e) {
       this.message.set({ text: `No se pudieron leer los entrenos: ${errorText(e)}`, error: true });
