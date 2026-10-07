@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, OnInit, signal, untracked } from '
 import { RouterLink } from '@angular/router';
 import { DiaryRow, DiaryService } from '../core/diary/diary.service';
 import { BalanceCard } from '../core/energy/balance-card';
+import { CreatineCard } from '../core/supplements/creatine-card';
 import { MenuService } from '../core/menu/menu.service';
 import { SettingsService } from '../core/settings/settings.service';
 import { isoDate, MEAL_SLOTS, optionsFor, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
@@ -34,7 +35,7 @@ interface LogForm {
 
 @Component({
   selector: 'app-today-page',
-  imports: [RouterLink, BalanceCard, WorkoutsCard, MonthCalendar],
+  imports: [RouterLink, BalanceCard, CreatineCard, WorkoutsCard, MonthCalendar],
   templateUrl: './today.page.html',
   styleUrl: './today.page.scss',
 })
@@ -157,12 +158,15 @@ export class TodayPage implements OnInit {
     const open = !this.calendarOpen();
     this.calendarOpen.set(open);
     if (open) {
-      const [meals, workouts, energy] = await Promise.all([
+      const [meals, workouts, energy, creatine] = await Promise.all([
         this.diary.datesWithEntries(),
         this.training.workoutDates(),
         this.settings.getEnergyLog(),
+        this.settings.getCreatineDays(),
       ]);
-      this.marked.set(new Set([...meals, ...workouts, ...energy.map((e) => e.date)]));
+      this.marked.set(
+        new Set([...meals, ...workouts, ...energy.map((e) => e.date), ...creatine]),
+      );
     }
   }
 
