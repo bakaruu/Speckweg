@@ -93,12 +93,16 @@ const RINGS = [52, 39, 26];
 
       @if (b().targetKcal; as target) {
         <p class="small">
-          {{ goalLabel() }}: unas {{ n(target) }} kcal al día.
+          {{ goalLabel() }}: unas {{ n(b().usualTargetKcal!) }} kcal en un día normal.
           @if (b().spendSource === 'reloj') {
             Tu gasto medio de la última semana según el reloj es de {{ n(b().dailySpendKcal!) }}
             kcal.
           } @else {
             Es una estimación con tus datos; con unos días del reloj se ajusta a tu gasto real.
+          }
+          @if (target > b().usualTargetKcal!) {
+            {{ isToday() ? 'Hoy has' : 'Ese día habías' }} gastado más de lo normal, así que
+            {{ isToday() ? 'hoy te tocan' : 'te tocaban' }} {{ n(target) }}.
           }
         </p>
       } @else {
@@ -129,7 +133,8 @@ const RINGS = [52, 39, 26];
   `,
   styles: `
     .summary {
-      max-width: 860px;
+      max-width: var(--card-max, 860px);
+      container-type: inline-size;
       margin-bottom: 16px;
       --comida: #fa3c5a;
       --proteina: #8ee000;
@@ -203,6 +208,18 @@ const RINGS = [52, 39, 26];
       flex-direction: column;
       gap: 12px;
       margin-left: auto;
+    }
+    /* Tarjeta estrecha: anillos y números arriba, y los dos totales lado a lado debajo. */
+    @container (max-width: 680px) {
+      .big {
+        flex: 1 1 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px 32px;
+        margin-left: 0;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
     }
     .big strong {
       font-size: 1.6rem;

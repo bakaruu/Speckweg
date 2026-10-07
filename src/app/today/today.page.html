@@ -31,12 +31,16 @@
   }
 </div>
 
+<div class="columns">
+<div class="col">
 <app-balance-card [eatenKcal]="eaten().kcal" [eatenProteinG]="eaten().proteinG" [date]="date()" />
 
 <app-creatine-card [date]="date()" />
 
 <app-workouts-card [date]="date()" />
+</div>
 
+<div class="col">
 <section class="card day">
   <header>
     <div>
@@ -218,3 +222,5 @@
     </ul>
   }
 </section>
+</div>
+</div>

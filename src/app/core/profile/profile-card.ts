@@ -1,8 +1,9 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PROTEIN_G_PER_KG, proteinTargetG } from '../../planner/daily-plan';
+import { EnergyDay, targetFor, usualSpend } from '../energy/energy';
 import { SettingsService } from '../settings/settings.service';
-import { dailyKcal, Goal, GOALS, Profile, Sex, weightChange, WeightEntry } from './body';
+import { Goal, GOALS, Profile, Sex, weightChange, WeightEntry } from './body';
 
 /** Ajustes → Tus datos: peso (a mano o de Salud), altura, edad, sexo y objetivo, con la evolución del peso. */
 @Component({
@@ -40,7 +41,7 @@ import { dailyKcal, Goal, GOALS, Profile, Sex, weightChange, WeightEntry } from 
             <option value="mujer">Mujer</option>
           </select>
         </label>
-        <label>
+        <label class="goal">
           Objetivo
           <select [(ngModel)]="goal">
             @for (g of goals; track g.goal) {
@@ -65,11 +66,14 @@ import { dailyKcal, Goal, GOALS, Profile, Sex, weightChange, WeightEntry } from 
           </div>
           @if (kcal(); as k) {
             <div>
-              <strong>{{ k.target }} kcal</strong><span class="muted">al día para tu objetivo</span>
+              <strong>{{ k.target }} kcal</strong
+              ><span class="muted">al día para tu objetivo (un día normal)</span>
             </div>
             <div>
               <strong>{{ k.spend }} kcal</strong
-              ><span class="muted">gasto estimado ({{ k.basal }} en reposo)</span>
+              ><span class="muted">{{
+                k.source === 'reloj' ? 'gasto medio de la última semana según el reloj' : 'gasto estimado con tus datos'
+              }}</span>
             </div>
           }
         </div>
@@ -128,6 +132,12 @@ import { dailyKcal, Goal, GOALS, Profile, Sex, weightChange, WeightEntry } from 
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 0 12px;
       margin-top: 12px;
+    }
+    .goal {
+      grid-column: 1 / -1;
+    }
+    .goal select {
+      max-width: 340px;
     }
     select {
       padding: 8px;
@@ -191,10 +201,19 @@ export class ProfileCard implements OnInit {
 
   protected readonly log = signal<WeightEntry[]>([]);
   private readonly profile = signal<Profile>({});
+  private readonly energyLog = signal<EnergyDay[]>([]);
 
   protected readonly current = computed(() => this.log().at(-1)?.kg);
   protected readonly protein = computed(() => proteinTargetG(this.current()));
-  protected readonly kcal = computed(() => dailyKcal(this.profile(), this.current()));
+  /** Lo mismo que usa el Resumen de Hoy: la media del reloj o, si no hay, la estimación. */
+  protected readonly kcal = computed(() => {
+    const usual = usualSpend(this.energyLog(), this.profile(), this.current());
+    if (!usual) {
+      return undefined;
+    }
+    const goal = this.profile().goal ?? 'mantener';
+    return { spend: usual.spendKcal, source: usual.source, target: targetFor(usual.spendKcal, goal) };
+  });
   protected readonly change7 = computed(() => weightChange(this.log(), 7));
   protected readonly change30 = computed(() => weightChange(this.log(), 30));
   protected readonly lastEntries = computed(() => this.log().slice(-6).reverse());
@@ -253,6 +272,7 @@ export class ProfileCard implements OnInit {
   private async load(): Promise<void> {
     const profile = await this.settings.getProfile();
     this.profile.set(profile);
+    this.energyLog.set(await this.settings.getEnergyLog());
     this.heightCm.set(profile.heightCm ?? null);
     this.birthYear.set(profile.birthYear ?? null);
     this.sex.set(profile.sex ?? null);

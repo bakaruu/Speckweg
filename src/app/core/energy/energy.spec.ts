@@ -4,6 +4,8 @@ import {
   mergeEnergy,
   parseDailyTotals,
   ringFraction,
+  targetFor,
+  usualSpend,
   withoutFirstDay,
 } from './energy';
 
@@ -97,6 +99,28 @@ describe('balance', () => {
     expect(result.targetKcal).toBe(2130); // 85 % de 2500
     expect(result.remainingKcal).toBe(930);
     expect(result.yesterday).toEqual({ eatenKcal: 1900, spentKcal: 2400, netKcal: -500 });
+  });
+
+  it('si hoy se gasta más que un día normal sube el objetivo de hoy, pero no el de un día normal', () => {
+    const result = balance({
+      eatenKcal: 800,
+      log: [
+        { date: '2026-10-04', restingKcal: 2000, activeKcal: 500 },
+        { date: '2026-10-05', restingKcal: 2100, activeKcal: 1100 },
+      ],
+      profile,
+      now,
+    });
+    expect(result.usualTargetKcal).toBe(2130); // 85 % de 2500, lo que sale en Ajustes
+    expect(result.targetKcal).toBe(2720); // 85 % de 3200
+  });
+
+  it('usualSpend da lo mismo que el Resumen: la media del reloj o la estimación', () => {
+    expect(
+      usualSpend([{ date: '2026-10-04', restingKcal: 2000, activeKcal: 500 }], profile, 97.5, now),
+    ).toEqual({ spendKcal: 2500, source: 'reloj' });
+    expect(usualSpend([], profile, 97.5, now)?.source).toBe('estimado');
+    expect(targetFor(2500, 'recomposicion')).toBe(2130);
   });
 
   it('sin días del reloj usa la estimación del perfil', () => {

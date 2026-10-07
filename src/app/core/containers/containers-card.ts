@@ -33,7 +33,7 @@ import { ContainersService, FoodContainer, photoToThumbnail } from './containers
             </div>
           </li>
         } @empty {
-          <li class="muted">Todavía no tienes recipientes.</li>
+          <li class="muted empty">Todavía no tienes recipientes.</li>
         }
       </ul>
 
@@ -84,6 +84,9 @@ import { ContainersService, FoodContainer, photoToThumbnail } from './containers
       align-items: center;
       padding: 8px 0;
       border-top: 1px solid var(--border);
+    }
+    li.empty {
+      display: block;
     }
     img {
       width: 56px;
