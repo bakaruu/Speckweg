@@ -73,6 +73,17 @@ export class SettingsService {
     await store.save();
   }
 
+  /** Días (YYYY-MM-DD) en que se ha tomado la creatina. */
+  async getCreatineDays(): Promise<string[]> {
+    return (await (await this.open()).get<string[]>('creatineDays')) ?? [];
+  }
+
+  async setCreatineDays(days: string[]): Promise<void> {
+    const store = await this.open();
+    await store.set('creatineDays', [...days].sort());
+    await store.save();
+  }
+
   /** Momento (ISO 8601) de la última sincronización correcta con Hevy. */
   async getHevyLastSync(): Promise<string | undefined> {
     return (await this.open()).get<string>('hevyLastSync');
