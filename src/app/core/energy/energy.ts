@@ -71,6 +71,39 @@ export function spentKcal(day: EnergyDay | undefined): number | undefined {
   return (day.restingKcal ?? 0) + (day.activeKcal ?? 0);
 }
 
+/**
+ * Gasto de un día normal: la media de los días completos del reloj de la última semana (sin contar
+ * hoy) o, si no hay, la estimación con los datos del perfil.
+ */
+export function usualSpend(
+  log: EnergyDay[],
+  profile: Profile,
+  weightKg: number | undefined,
+  now = new Date(),
+): { spendKcal: number; source: 'reloj' | 'estimado' } | undefined {
+  const todayIso = isoDate(now);
+  const weekAgoIso = isoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7));
+  const fullDays = log.filter(
+    (d) =>
+      d.date >= weekAgoIso &&
+      d.date < todayIso &&
+      d.restingKcal !== undefined &&
+      d.activeKcal !== undefined,
+  );
+  if (fullDays.length > 0) {
+    const total = fullDays.reduce((sum, d) => sum + (spentKcal(d) ?? 0), 0);
+    return { spendKcal: Math.round(total / fullDays.length), source: 'reloj' };
+  }
+  const estimate = dailyKcal(profile, weightKg, now);
+  return estimate ? { spendKcal: estimate.spend, source: 'estimado' } : undefined;
+}
+
+/** Kcal al día para el objetivo a partir de un gasto, redondeadas a decenas. */
+export function targetFor(spendKcal: number, goal: Goal): number {
+  const factor = GOALS.find((g) => g.goal === goal)?.factor ?? 1;
+  return Math.round((spendKcal * factor) / 10) * 10;
+}
+
 export interface Balance {
   eatenKcal: number;
   /** Gastado hoy hasta la última vez que corrió el Atajo, si hay datos de Salud. */
@@ -79,7 +112,9 @@ export interface Balance {
   dailySpendKcal?: number;
   spendSource?: 'reloj' | 'estimado';
   goal: Goal;
-  /** Kcal al día para el objetivo y lo que queda por comer hoy. */
+  /** Kcal de un día normal para el objetivo (lo que sale en Ajustes). */
+  usualTargetKcal?: number;
+  /** Kcal para el objetivo hoy (más que lo normal si hoy ya se ha gastado más) y lo que queda. */
   targetKcal?: number;
   remainingKcal?: number;
   yesterday?: { eatenKcal: number; spentKcal: number; netKcal: number };
@@ -100,9 +135,7 @@ export function balance(input: {
   const now = input.now ?? new Date();
   const todayIso = isoDate(now);
   const yesterdayIso = isoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
-  const weekAgoIso = isoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7));
   const goal = input.profile.goal ?? 'mantener';
-  const factor = GOALS.find((g) => g.goal === goal)?.factor ?? 1;
 
   const result: Balance = { eatenKcal: input.eatenKcal, goal };
 
@@ -117,30 +150,16 @@ export function balance(input: {
     };
   }
 
-  // Días completos con reposo y actividad: los de la última semana, sin contar hoy.
-  const fullDays = input.log.filter(
-    (d) =>
-      d.date >= weekAgoIso &&
-      d.date < todayIso &&
-      d.restingKcal !== undefined &&
-      d.activeKcal !== undefined,
-  );
-  if (fullDays.length > 0) {
-    result.dailySpendKcal = Math.round(
-      fullDays.reduce((sum, d) => sum + (spentKcal(d) ?? 0), 0) / fullDays.length,
-    );
-    result.spendSource = 'reloj';
-  } else {
-    const estimate = dailyKcal(input.profile, input.weightKg, now);
-    if (estimate) {
-      result.dailySpendKcal = estimate.spend;
-      result.spendSource = 'estimado';
-    }
+  const usual = usualSpend(input.log, input.profile, input.weightKg, now);
+  if (usual) {
+    result.dailySpendKcal = usual.spendKcal;
+    result.spendSource = usual.source;
   }
   if (result.dailySpendKcal !== undefined) {
     // Si hoy ya se ha gastado más que un día normal, manda lo de hoy.
     const spend = Math.max(result.dailySpendKcal, spentToday ?? 0);
-    result.targetKcal = Math.round((spend * factor) / 10) * 10;
+    result.usualTargetKcal = targetFor(result.dailySpendKcal, goal);
+    result.targetKcal = targetFor(spend, goal);
     result.remainingKcal = result.targetKcal - input.eatenKcal;
   }
 

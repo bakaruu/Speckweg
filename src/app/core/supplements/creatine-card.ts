@@ -23,7 +23,7 @@ import { creatineStreak } from './creatine';
   `,
   styles: `
     .creatine {
-      max-width: 860px;
+      max-width: var(--card-max, 860px);
       margin-bottom: 16px;
       display: flex;
       align-items: center;

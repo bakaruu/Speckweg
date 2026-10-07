@@ -12,6 +12,7 @@ import { TrainingService } from '../training/training.service';
   imports: [FormsModule, ProfileCard, ContainersCard],
   template: `
     <h1>Ajustes</h1>
+    <div class="cards">
     <app-profile-card />
     <app-containers-card />
     <section class="card">
@@ -89,6 +90,21 @@ import { TrainingService } from '../training/training.service';
         </button>
       }
     </section>
+    </div>
+  `,
+  styles: `
+    /* En pantalla ancha las tarjetas van en dos columnas en vez de una estrecha a la izquierda. */
+    .cards {
+      columns: 2 460px;
+      column-gap: 16px;
+      max-width: 1400px;
+      --card-max: none;
+    }
+    .cards > * {
+      display: block;
+      break-inside: avoid;
+      margin: 0 0 16px;
+    }
   `,
 })
 export class SettingsPage implements OnInit {

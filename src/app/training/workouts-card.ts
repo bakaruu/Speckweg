@@ -92,7 +92,7 @@ import { describeSets, estimateKcal, summarize } from './workout';
   `,
   styles: `
     .workouts {
-      max-width: 860px;
+      max-width: var(--card-max, 860px);
       margin-bottom: 16px;
     }
     header {

@@ -33,7 +33,8 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 16px 20px;
-  max-width: 560px;
+  max-width: var(--card-max, 560px);
+  box-sizing: border-box;
 }
 
 label {
