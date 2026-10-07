@@ -74,6 +74,22 @@ const RINGS = [52, 39, 26];
               <strong>—</strong>
             }
           </div>
+          @if (b().today; as t) {
+            <div>
+              <span class="muted"
+                >{{ t.netKcal > 0 ? 'Superávit' : 'Déficit' }}
+                {{ isToday() ? 'de hoy' : 'de ese día' }}</span
+              >
+              <strong [class.over]="t.netKcal > 0"
+                >{{ n(abs(t.netKcal)) }} <small>kcal</small></strong
+              >
+              <span class="muted small"
+                >gastado {{ n(t.spentKcal) }} − comido {{ n(b().eatenKcal) }}{{
+                  isToday() ? ', hasta ahora' : ''
+                }}</span
+              >
+            </div>
+          }
           <div>
             @if (b().remainingKcal !== undefined && b().targetKcal) {
               <span class="muted">{{ remainingLabel() }}</span>
