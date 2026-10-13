@@ -3,6 +3,7 @@ import { load, Store } from '@tauri-apps/plugin-store';
 import { DEFAULT_DISHES, DEFAULT_INGREDIENTS } from '../../planner/default-menu';
 import { MealIdea } from '../../planner/meal-catalog';
 import { Dish, Ingredient, Menu, newId, toMealIdea } from '../../planner/menu-model';
+import { applyMenuUpdates, MENU_UPDATES } from '../../planner/menu-updates';
 
 /**
  * Tu menú editable: ingredientes con sus medidas caseras y platos.
@@ -26,10 +27,21 @@ export class MenuService {
   load(): Promise<void> {
     this.loaded ??= (async () => {
       try {
-        const saved = await (await this.open()).get<Menu>('menu');
+        const store = await this.open();
+        const saved = await store.get<Menu>('menu');
         if (saved?.ingredients && saved?.dishes) {
-          this.ingredients.set(saved.ingredients);
-          this.dishes.set(saved.dishes);
+          // Cambios de la app sobre tu menú (por ejemplo, la leche de soja), una sola vez cada uno.
+          const result = applyMenuUpdates(saved, (await store.get<string[]>('updates')) ?? []);
+          this.ingredients.set(result.menu.ingredients);
+          this.dishes.set(result.menu.dishes);
+          if (result.changed) {
+            await store.set('updates', result.applied);
+            await this.save();
+          }
+        } else {
+          // El menú inicial ya los trae: se apuntan para no aplicarlos luego encima de tus cambios.
+          await store.set('updates', MENU_UPDATES.map((u) => u.id));
+          await store.save();
         }
       } catch {
         // Fuera de la app de escritorio (tests, navegador) no hay almacenamiento: se usa el menú inicial.
