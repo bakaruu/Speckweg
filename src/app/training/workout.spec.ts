@@ -67,8 +67,8 @@ const workout: HevyWorkout = {
 };
 
 describe('workout', () => {
-  it('resume duración, series efectivas y volumen sin contar el calentamiento', () => {
-    expect(summarize(workout)).toEqual({ durationMin: 65, exercises: 2, sets: 3, volumeKg: 1280 });
+  it('resume duración, series efectivas y volumen con el calentamiento, como Hevy', () => {
+    expect(summarize(workout)).toEqual({ durationMin: 65, exercises: 2, sets: 3, volumeKg: 1680 });
   });
 
   it('estima calorías con la duración y el peso', () => {
@@ -112,7 +112,7 @@ describe('CSV de Hevy', () => {
       reps: 8,
       rpe: 8,
     });
-    expect(summarize(pierna)).toMatchObject({ durationMin: 60, sets: 2, volumeKg: 2080 });
+    expect(summarize(pierna)).toMatchObject({ durationMin: 60, sets: 2, volumeKg: 2480 });
     expect(empuje.title).toBe('Empuje');
   });
 
