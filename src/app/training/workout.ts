@@ -12,11 +12,15 @@ export interface WorkoutSummary {
   volumeKg: number;
 }
 
-/** Duración, ejercicios, series efectivas (sin calentamiento) y volumen (kg × repeticiones). */
+/**
+ * Duración, ejercicios, series efectivas (sin calentamiento) y volumen (kg × repeticiones).
+ * El volumen cuenta también el calentamiento, igual que lo calcula Hevy en su app.
+ */
 export function summarize(workout: HevyWorkout): WorkoutSummary {
   const durationMs = new Date(workout.end_time).getTime() - new Date(workout.start_time).getTime();
-  const working = workout.exercises.flatMap((e) => e.sets).filter((s) => s.type !== 'warmup');
-  const volumeKg = working.reduce((sum, s) => sum + (s.weight_kg ?? 0) * (s.reps ?? 0), 0);
+  const sets = workout.exercises.flatMap((e) => e.sets);
+  const working = sets.filter((s) => s.type !== 'warmup');
+  const volumeKg = sets.reduce((sum, s) => sum + (s.weight_kg ?? 0) * (s.reps ?? 0), 0);
   return {
     durationMin: Math.max(0, Math.round(durationMs / 60000)),
     exercises: workout.exercises.length,
