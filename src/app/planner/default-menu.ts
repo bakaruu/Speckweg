@@ -1,13 +1,18 @@
 import { Dish, DishLine, Ingredient } from './menu-model';
 
+export const SOY_MILK_ID = 'leche-soja-kaiku';
+export const POST_WORKOUT_SHAKE_ID = 'batido-post-entreno';
+
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
  * Valores aproximados por 100 g.
  */
 export const DEFAULT_INGREDIENTS: Ingredient[] = [
-  // Proteína de soja HSN (Evosoy): unos 110 kcal y 26 g de proteína por 30 g. Revisa la etiqueta de tu bote.
-  { id: 'proteina-soja-hsn', name: 'Proteína de soja HSN', kcal100: 367, protein100: 87, measure: { name: 'cacito', grams: 30 } },
-  { id: 'avena', name: 'Copos de avena', kcal100: 375, protein100: 13, measure: { name: 'cazo', grams: 50 } },
+  // Proteína de soja HSN (Evosoy): unos 110 kcal y 26 g de proteína por 30 g. Un cacito de 50 ml lleva unos 20 g.
+  { id: 'proteina-soja-hsn', name: 'Proteína de soja HSN', kcal100: 367, protein100: 87, measure: { name: 'cacito', grams: 20 } },
+  { id: 'avena', name: 'Copos de avena', kcal100: 375, protein100: 13, measure: { name: 'cazo', grams: 20 } },
+  // Kaiku Begetal Soja sin azúcares añadidos, según su etiqueta: 32 kcal y 3,1 g de proteína por 100 ml.
+  { id: SOY_MILK_ID, name: 'Leche de soja Kaiku', kcal100: 32, protein100: 3.1, measure: { name: 'vaso', grams: 300 } },
   { id: 'leche', name: 'Leche semidesnatada', kcal100: 46, protein100: 3.2, measure: { name: 'vaso', grams: 250 } },
   { id: 'platano', name: 'Plátano', kcal100: 89, protein100: 1.1, measure: { name: 'unidad', grams: 120 } },
   { id: 'fruta', name: 'Fruta (manzana, naranja…)', kcal100: 50, protein100: 0.5, measure: { name: 'pieza', grams: 180 } },
@@ -45,8 +50,8 @@ const g = (ingredientId: string, grams: number): DishLine => ({ ingredientId, am
 
 export const DEFAULT_DISHES: Dish[] = [
   // Desayunos
-  { id: 'avena-leche-platano', slot: 'desayuno', name: 'Avena con leche y plátano', portion: '1 tazón', notes: 'Con canela', lines: [m('avena'), m('leche'), m('platano')] },
-  { id: 'batido-soja-avena-platano', slot: 'desayuno', name: 'Batido de soja con avena y plátano', portion: '1 vaso grande', lines: [m('proteina-soja-hsn'), g('avena', 40), m('platano'), g('leche', 300)] },
+  { id: 'avena-leche-platano', slot: 'desayuno', name: 'Avena con leche y plátano', portion: '1 tazón', notes: 'Con canela', lines: [m('avena', 2), g(SOY_MILK_ID, 250), m('platano')] },
+  { id: 'batido-soja-avena-platano', slot: 'desayuno', name: 'Batido de soja con avena y plátano', portion: '1 vaso grande', lines: [m('proteina-soja-hsn'), g('avena', 40), m('platano'), g(SOY_MILK_ID, 300)] },
   { id: 'tostadas-tomate-pavo', slot: 'desayuno', name: 'Tostadas con tomate y pavo', portion: '2 tostadas', lines: [m('pan', 2), m('tomate', 2), m('aceite'), m('pavo', 4)] },
   { id: 'yogur-fruta-avena', slot: 'desayuno', name: 'Yogur con fruta y avena', portion: '1 bol', lines: [m('yogur', 2), m('fruta'), g('avena', 30)] },
   { id: 'tostada-huevo-brocoli', slot: 'desayuno', name: 'Tostada con revuelto de huevo y brócoli', portion: '1 tostada con revuelto', notes: 'El brócoli picado y salteado con ajo', lines: [m('huevo', 2), g('brocoli', 80), m('pan'), g('aceite', 5)] },
@@ -64,7 +69,8 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: 'pasta-brocoli-atun', slot: 'comida', name: 'Espaguetis con brócoli asado y atún', portion: '1 plato', notes: 'Brócoli al horno o airfryer, 200 °C 12 min con aceite y ajo', lines: [m('espaguetis'), m('brocoli'), m('atun'), m('aceite'), g('queso-rallado', 10)] },
 
   // Meriendas
-  { id: 'batido-soja-platano', slot: 'merienda', name: 'Batido de proteína de soja con plátano', portion: '1 vaso grande', lines: [m('proteina-soja-hsn'), m('platano'), g('leche', 300)] },
+  { id: POST_WORKOUT_SHAKE_ID, slot: 'merienda', name: 'Batido post-entreno', portion: '1 vaso grande', usual: true, lines: [g(SOY_MILK_ID, 300), m('proteina-soja-hsn', 1.5), m('avena', 1.5)] },
+  { id: 'batido-soja-platano', slot: 'merienda', name: 'Batido de proteína de soja con plátano', portion: '1 vaso grande', lines: [m('proteina-soja-hsn'), m('platano'), g(SOY_MILK_ID, 300)] },
   { id: 'yogur-frutos-secos', slot: 'merienda', name: 'Yogur con un puñado de frutos secos', portion: '1 yogur + 1 puñado', lines: [m('yogur'), m('frutos-secos')] },
   { id: 'bocadillo-pavo', slot: 'merienda', name: 'Bocadillo pequeño de pavo y queso', portion: '1 bocadillo pequeño', lines: [m('pan', 2), m('pavo', 3), m('queso')] },
   { id: 'tostada-tomate-atun', slot: 'merienda', name: 'Tostada con tomate y atún', portion: '1 tostada', lines: [m('pan'), m('tomate', 2), m('atun')] },
