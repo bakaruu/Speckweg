@@ -1,6 +1,6 @@
 import { DEFAULT_DISHES, DEFAULT_INGREDIENTS } from './default-menu';
 import { dishTotals, Menu } from './menu-model';
-import { applyMenuUpdates, SOY_MILK_UPDATE } from './menu-updates';
+import { applyMenuUpdates, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, SOY_MILK_UPDATE } from './menu-updates';
 
 describe('applyMenuUpdates', () => {
   // Como lo tenía Aru: proteína renombrada, cacito y cazo a 50 g, y leche semidesnatada en el desayuno.
@@ -27,9 +27,7 @@ describe('applyMenuUpdates', () => {
   };
 
   it('añade la leche de soja, pone las medidas a 20 g, cambia la leche y crea el batido', () => {
-    const { menu, applied, changed } = applyMenuUpdates(saved, []);
-    expect(changed).toBe(true);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id]);
+    const menu = SOY_MILK_UPDATE.apply(saved);
     const byId = new Map(menu.ingredients.map((i) => [i.id, i]));
     expect(byId.get('leche-soja-kaiku')?.name).toBe('Leche de soja Kaiku');
     expect(byId.get('proteina-soja-hsn')?.measure).toEqual({ name: 'cacito', grams: 20 });
@@ -42,8 +40,26 @@ describe('applyMenuUpdates', () => {
     expect(dishTotals(shake, menu.ingredients)).toEqual({ grams: 360, kcal: 319, proteinG: 39 });
   });
 
+  it('después pone la proteína con su etiqueta y el cacito a 30 g', () => {
+    const { menu, applied, changed } = applyMenuUpdates(saved, []);
+    expect(changed).toBe(true);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id]);
+    const protein = menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')!;
+    expect(protein).toEqual({ id: 'proteina-soja-hsn', name: 'Proteína de soja', kcal100: 389, protein100: 92, measure: { name: 'cacito', grams: 30 } });
+    expect(menu.ingredients.find((i) => i.id === 'avena')?.measure?.grams).toBe(20);
+    const shake = menu.dishes.find((d) => d.id === 'batido-post-entreno')!;
+    // 300 ml de soja (96 kcal, 9,3 g) + 45 g de proteína (175 kcal, 41,4 g) + 30 g de avena (112,5 kcal, 3,9 g)
+    expect(dishTotals(shake, menu.ingredients)).toEqual({ grams: 375, kcal: 384, proteinG: 55 });
+  });
+
+  it('solo aplica lo que falta', () => {
+    const { menu, applied } = applyMenuUpdates(SOY_MILK_UPDATE.apply(saved), [SOY_MILK_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id]);
+    expect(menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')?.measure?.grams).toBe(30);
+  });
+
   it('no repite un cambio ya aplicado, así respeta lo que edites después', () => {
-    const result = applyMenuUpdates(saved, [SOY_MILK_UPDATE.id]);
+    const result = applyMenuUpdates(saved, MENU_UPDATES.map((u) => u.id));
     expect(result.changed).toBe(false);
     expect(result.menu).toBe(saved);
   });
