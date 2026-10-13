@@ -60,7 +60,22 @@ export const SOY_MILK_UPDATE: MenuUpdate = {
   },
 };
 
-export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE];
+/** Octubre 2026: la proteína es HSN Soy Protein Isolate 2.0 (etiqueta) y su cacito de 50 ml pesa 30 g. */
+export const PROTEIN_ISOLATE_UPDATE: MenuUpdate = {
+  id: '2026-10-proteina-hsn-isolate',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const protein = byIdOrName(ingredients, 'proteina-soja-hsn', /prote[ií]na de soja/i);
+    if (protein) {
+      protein.kcal100 = 389;
+      protein.protein100 = 92;
+      protein.measure = { name: protein.measure?.name || 'cacito', grams: 30 };
+    }
+    return { ingredients, dishes: menu.dishes };
+  },
+};
+
+export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE, PROTEIN_ISOLATE_UPDATE];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
 export function applyMenuUpdates(menu: Menu, applied: string[]): { menu: Menu; applied: string[]; changed: boolean } {
