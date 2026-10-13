@@ -11,8 +11,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   // Proteína de soja HSN (Evosoy): unos 110 kcal y 26 g de proteína por 30 g. Un cacito de 50 ml lleva unos 20 g.
   { id: 'proteina-soja-hsn', name: 'Proteína de soja HSN', kcal100: 367, protein100: 87, measure: { name: 'cacito', grams: 20 } },
   { id: 'avena', name: 'Copos de avena', kcal100: 375, protein100: 13, measure: { name: 'cazo', grams: 20 } },
-  // Kaiku Begetal Soja sin azúcares añadidos: unos 34 kcal y 3,3 g de proteína por 100 ml.
-  { id: SOY_MILK_ID, name: 'Leche de soja Kaiku', kcal100: 34, protein100: 3.3, measure: { name: 'vaso', grams: 300 } },
+  // Kaiku Begetal Soja sin azúcares añadidos, según su etiqueta: 32 kcal y 3,1 g de proteína por 100 ml.
+  { id: SOY_MILK_ID, name: 'Leche de soja Kaiku', kcal100: 32, protein100: 3.1, measure: { name: 'vaso', grams: 300 } },
   { id: 'leche', name: 'Leche semidesnatada', kcal100: 46, protein100: 3.2, measure: { name: 'vaso', grams: 250 } },
   { id: 'platano', name: 'Plátano', kcal100: 89, protein100: 1.1, measure: { name: 'unidad', grams: 120 } },
   { id: 'fruta', name: 'Fruta (manzana, naranja…)', kcal100: 50, protein100: 0.5, measure: { name: 'pieza', grams: 180 } },

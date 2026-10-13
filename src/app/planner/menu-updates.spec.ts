@@ -38,8 +38,8 @@ describe('applyMenuUpdates', () => {
 
     const shake = menu.dishes.find((d) => d.id === 'batido-post-entreno')!;
     expect(shake.name).toBe('Batido post-entreno');
-    // 300 ml de soja (102 kcal, 9,9 g) + 30 g de proteína (110 kcal, 26,1 g) + 30 g de avena (112,5 kcal, 3,9 g)
-    expect(dishTotals(shake, menu.ingredients)).toEqual({ grams: 360, kcal: 325, proteinG: 40 });
+    // 300 ml de soja (96 kcal, 9,3 g) + 30 g de proteína (110 kcal, 26,1 g) + 30 g de avena (112,5 kcal, 3,9 g)
+    expect(dishTotals(shake, menu.ingredients)).toEqual({ grams: 360, kcal: 319, proteinG: 39 });
   });
 
   it('no repite un cambio ya aplicado, así respeta lo que edites después', () => {
