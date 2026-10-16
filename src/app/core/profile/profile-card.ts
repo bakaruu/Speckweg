@@ -3,9 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { PROTEIN_G_PER_KG, proteinTargetG } from '../../planner/daily-plan';
 import { EnergyDay, targetFor, usualSpend } from '../energy/energy';
 import { SettingsService } from '../settings/settings.service';
-import { Goal, GOALS, Profile, Sex, weightChange, WeightEntry } from './body';
+import { Goal, GOALS, Profile, Sex, WeightEntry } from './body';
 
-/** Ajustes → Tus datos: peso (a mano o de Salud), altura, edad, sexo y objetivo, con la evolución del peso. */
+/** Ajustes → Tus datos: peso (a mano o de Salud), altura, edad, sexo y objetivo, (la gráfica del peso está en Hoy). */
 @Component({
   selector: 'app-profile-card',
   imports: [FormsModule],
@@ -84,37 +84,6 @@ import { Goal, GOALS, Profile, Sex, weightChange, WeightEntry } from './body';
         }
       }
 
-      @if (log().length > 1) {
-        <h3>Evolución del peso</h3>
-        <svg
-          class="spark"
-          viewBox="0 0 300 60"
-          preserveAspectRatio="none"
-          role="img"
-          aria-label="Evolución del peso"
-        >
-          <polyline [attr.points]="sparkPoints()" />
-        </svg>
-        <p class="small">
-          @if (change7() !== undefined) {
-            <span>{{ signed(change7()!) }} kg en 7 días</span>
-          }
-          @if (change30() !== undefined) {
-            <span> · {{ signed(change30()!) }} kg en 30 días</span>
-          }
-        </p>
-        <ul class="log">
-          @for (e of lastEntries(); track e.date) {
-            <li>
-              <span>{{ dateLabel(e.date) }}</span>
-              <span
-                >{{ e.kg }} kg
-                <span class="muted">{{ e.source === 'salud' ? '· Salud' : '· a mano' }}</span></span
-              >
-            </li>
-          }
-        </ul>
-      }
     </section>
   `,
   styles: `
@@ -163,27 +132,6 @@ import { Goal, GOALS, Profile, Sex, weightChange, WeightEntry } from './body';
       font-size: 1.2rem;
       color: var(--accent);
     }
-    .spark {
-      width: 100%;
-      height: 60px;
-    }
-    .spark polyline {
-      fill: none;
-      stroke: var(--accent);
-      stroke-width: 2;
-      vector-effect: non-scaling-stroke;
-    }
-    .log {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .log li {
-      display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      border-top: 1px solid var(--border);
-    }
   `,
 })
 export class ProfileCard implements OnInit {
@@ -214,23 +162,6 @@ export class ProfileCard implements OnInit {
     const goal = this.profile().goal ?? 'mantener';
     return { spend: usual.spendKcal, source: usual.source, target: targetFor(usual.spendKcal, goal) };
   });
-  protected readonly change7 = computed(() => weightChange(this.log(), 7));
-  protected readonly change30 = computed(() => weightChange(this.log(), 30));
-  protected readonly lastEntries = computed(() => this.log().slice(-6).reverse());
-  /** Línea de los últimos 90 días, escalada entre el peso mínimo y el máximo. */
-  protected readonly sparkPoints = computed(() => {
-    const entries = this.log().slice(-90);
-    const kgs = entries.map((e) => e.kg);
-    const min = Math.min(...kgs);
-    const range = Math.max(0.5, Math.max(...kgs) - min);
-    return entries
-      .map(
-        (e, i) =>
-          `${((i / Math.max(1, entries.length - 1)) * 300).toFixed(1)},${(55 - ((e.kg - min) / range) * 50).toFixed(1)}`,
-      )
-      .join(' ');
-  });
-
   async ngOnInit(): Promise<void> {
     await this.load();
   }
@@ -256,17 +187,6 @@ export class ProfileCard implements OnInit {
     await this.settings.setProfile(profile);
     this.profile.set(profile);
     this.message.set('Datos guardados.');
-  }
-
-  protected signed(kg: number): string {
-    return `${kg > 0 ? '+' : ''}${String(kg).replace('.', ',')}`;
-  }
-
-  protected dateLabel(date: string): string {
-    const [y, m, d] = date.split('-').map(Number);
-    return new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short' }).format(
-      new Date(y, m - 1, d),
-    );
   }
 
   private async load(): Promise<void> {
