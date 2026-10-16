@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, OnInit, signal, untracked } from '
 import { RouterLink } from '@angular/router';
 import { DiaryRow, DiaryService } from '../core/diary/diary.service';
 import { BalanceCard } from '../core/energy/balance-card';
+import { WeightCard } from '../core/profile/weight-card';
 import { CreatineCard } from '../core/supplements/creatine-card';
 import { MenuService } from '../core/menu/menu.service';
 import { SettingsService } from '../core/settings/settings.service';
@@ -35,7 +36,7 @@ interface LogForm {
 
 @Component({
   selector: 'app-today-page',
-  imports: [RouterLink, BalanceCard, CreatineCard, WorkoutsCard, MonthCalendar],
+  imports: [RouterLink, BalanceCard, CreatineCard, WeightCard, WorkoutsCard, MonthCalendar],
   templateUrl: './today.page.html',
   styleUrl: './today.page.scss',
 })
