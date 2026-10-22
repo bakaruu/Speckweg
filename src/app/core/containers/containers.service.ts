@@ -12,13 +12,21 @@ export interface FoodContainer {
 
 /** Recipientes de Aru que la app añade una sola vez (luego se pueden cambiar o borrar). */
 export const DEFAULT_CONTAINERS: FoodContainer[] = [
-  { id: 'plato-transparente-marron', name: 'Plato transparente marrón', grams: 396 },
+  { id: 'plato-transparente-marron', name: 'Plato transparente marrón hondo', grams: 396 },
   { id: 'taza', name: 'Taza', grams: 179 },
+  { id: 'plato-blanco-ondulado', name: 'Plato blanco ondulado', grams: 363 },
+  { id: 'plato-grande-dibujo-marron', name: 'Plato grande con dibujo marrón', grams: 435 },
+  { id: 'plato-pequeno-dibujo-marron', name: 'Plato pequeño con dibujo marrón', grams: 277 },
+  { id: 'plato-transparente-marron-plano', name: 'Plato transparente marrón plano', grams: 460 },
+  { id: 'vaso-batidora', name: 'Vaso de la batidora', grams: 153 },
 ];
 
 /** Añade los recipientes iniciales que falten y que no se hayan añadido antes. */
 export function addDefaultContainers(list: FoodContainer[], added: string[]): { list: FoodContainer[]; added: string[] } {
-  const result = [...list];
+  // Antes solo había un plato transparente marrón; ahora hay hondo y plano.
+  const result = list.map((c) =>
+    c.id === 'plato-transparente-marron' && c.name === 'Plato transparente marrón' ? { ...c, name: 'Plato transparente marrón hondo' } : c,
+  );
   for (const c of DEFAULT_CONTAINERS) {
     const exists = result.some((x) => x.id === c.id || x.name.trim().toLowerCase() === c.name.toLowerCase());
     if (!added.includes(c.id) && !exists) {
@@ -49,7 +57,7 @@ export class ContainersService {
         const before = (await store.get<string[]>('defaultsAdded')) ?? [];
         const { list, added } = addDefaultContainers(saved, before);
         this.list.set(list);
-        if (added.length !== before.length) {
+        if (added.length !== before.length || list.some((c, i) => c !== saved[i])) {
           await store.set('defaultsAdded', added);
           await this.persist();
         }
