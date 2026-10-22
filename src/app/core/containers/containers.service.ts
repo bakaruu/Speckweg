@@ -10,6 +10,24 @@ export interface FoodContainer {
   photo?: string;
 }
 
+/** Recipientes de Aru que la app añade una sola vez (luego se pueden cambiar o borrar). */
+export const DEFAULT_CONTAINERS: FoodContainer[] = [
+  { id: 'plato-transparente-marron', name: 'Plato transparente marrón', grams: 396 },
+  { id: 'taza', name: 'Taza', grams: 179 },
+];
+
+/** Añade los recipientes iniciales que falten y que no se hayan añadido antes. */
+export function addDefaultContainers(list: FoodContainer[], added: string[]): { list: FoodContainer[]; added: string[] } {
+  const result = [...list];
+  for (const c of DEFAULT_CONTAINERS) {
+    const exists = result.some((x) => x.id === c.id || x.name.trim().toLowerCase() === c.name.toLowerCase());
+    if (!added.includes(c.id) && !exists) {
+      result.push({ ...c });
+    }
+  }
+  return { list: result, added: DEFAULT_CONTAINERS.map((c) => c.id) };
+}
+
 /** Tus recipientes, guardados en containers.json en la carpeta de datos de la app. */
 @Injectable({ providedIn: 'root' })
 export class ContainersService {
@@ -26,7 +44,15 @@ export class ContainersService {
   load(): Promise<void> {
     this.loaded ??= (async () => {
       try {
-        this.list.set((await (await this.open()).get<FoodContainer[]>('containers')) ?? []);
+        const store = await this.open();
+        const saved = (await store.get<FoodContainer[]>('containers')) ?? [];
+        const before = (await store.get<string[]>('defaultsAdded')) ?? [];
+        const { list, added } = addDefaultContainers(saved, before);
+        this.list.set(list);
+        if (added.length !== before.length) {
+          await store.set('defaultsAdded', added);
+          await this.persist();
+        }
       } catch {
         // Fuera de la app de escritorio no hay almacenamiento.
       }

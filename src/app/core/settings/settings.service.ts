@@ -84,6 +84,17 @@ export class SettingsService {
     await store.save();
   }
 
+  /** Comidas que la app ya ha apuntado por su cuenta en el diario (ver planner/diary-updates.ts). */
+  async getDiaryUpdates(): Promise<string[]> {
+    return (await (await this.open()).get<string[]>('diaryUpdates')) ?? [];
+  }
+
+  async setDiaryUpdates(ids: string[]): Promise<void> {
+    const store = await this.open();
+    await store.set('diaryUpdates', ids);
+    await store.save();
+  }
+
   /** Momento (ISO 8601) de la última sincronización correcta con Hevy. */
   async getHevyLastSync(): Promise<string | undefined> {
     return (await this.open()).get<string>('hevyLastSync');

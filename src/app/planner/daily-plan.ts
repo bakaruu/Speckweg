@@ -32,7 +32,7 @@ export function optionsFor(slot: MealSlot, catalog: MealIdea[] = MEAL_CATALOG): 
  * para una comida concreta sin cambiar el resto.
  */
 export function pickMeal(date: Date, slot: MealSlot, shift = 0, catalog: MealIdea[] = MEAL_CATALOG): MealIdea | undefined {
-  const options = optionsFor(slot, catalog);
+  const options = optionsFor(slot, catalog).filter((m) => !m.side);
   if (options.length === 0) {
     return undefined;
   }

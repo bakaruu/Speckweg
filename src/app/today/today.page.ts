@@ -8,6 +8,7 @@ import { MenuService } from '../core/menu/menu.service';
 import { SettingsService } from '../core/settings/settings.service';
 import { isoDate, MEAL_SLOTS, optionsFor, pickMeal, proteinTargetG, totals } from '../planner/daily-plan';
 import { MealIdea, MealSlot } from '../planner/meal-catalog';
+import { pendingDiaryUpdates } from '../planner/diary-updates';
 import { foodGrams, macrosFor, parseGrams } from '../planner/portions';
 import { ContainersService } from '../core/containers/containers.service';
 import { TrainingService } from '../training/training.service';
@@ -132,9 +133,29 @@ export class TodayPage implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    void this.menu.load();
+    void this.menu.load().then(() => this.applyDiaryUpdates());
     void this.containers.load();
     this.weightKg.set(await this.settings.getWeightKg());
+  }
+
+  /** Apunta, una sola vez, las comidas que nos pasaste por el chat. */
+  private async applyDiaryUpdates(): Promise<void> {
+    try {
+      const applied = await this.settings.getDiaryUpdates();
+      const pending = pendingDiaryUpdates(applied, this.menu.meals());
+      for (const update of pending) {
+        for (const { meal, grams } of update.items) {
+          await this.diary.logMeal(update.date, meal, grams);
+        }
+        applied.push(update.id);
+        await this.settings.setDiaryUpdates(applied);
+      }
+      if (pending.length > 0) {
+        await this.loadEntries();
+      }
+    } catch {
+      // Fuera de la app de escritorio no hay diario.
+    }
   }
 
   protected moveDay(days: number): void {

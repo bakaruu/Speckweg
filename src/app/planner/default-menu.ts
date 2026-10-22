@@ -2,6 +2,9 @@ import { Dish, DishLine, Ingredient } from './menu-model';
 
 export const SOY_MILK_ID = 'leche-soja-kaiku';
 export const POST_WORKOUT_SHAKE_ID = 'batido-post-entreno';
+export const LENTILS_ID = 'lentejas-patata-trituradas';
+export const ROLLS_ID = 'panecillos-integrales';
+export const PICKLES_ID = 'encurtidos';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -38,11 +41,16 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   { id: 'sardina', name: 'Sardina', kcal100: 200, protein100: 25, measure: { name: 'sardina', grams: 50 } },
   { id: 'melon', name: 'Melón', kcal100: 34, protein100: 0.8, measure: { name: 'tajada', grams: 200 } },
   // Guisos caseros: valores del plato ya hecho.
-  { id: 'lentejas', name: 'Lentejas estofadas', kcal100: 120, protein100: 6.3, measure: { name: 'plato hondo', grams: 400 } },
+  // Las de Aru: solo lentejas y patata, sin chorizo ni morcilla, y trituradas. El plato de siempre son 434 g.
+  { id: LENTILS_ID, name: 'Lentejas con patata trituradas', kcal100: 80, protein100: 5, measure: { name: 'plato', grams: 434 } },
   { id: 'puchero', name: 'Puchero', kcal100: 144, protein100: 8.9, measure: { name: 'plato hondo', grams: 450 } },
   { id: 'estofado', name: 'Estofado de ternera con patatas', kcal100: 138, protein100: 8.8, measure: { name: 'plato hondo', grams: 400 } },
   { id: 'carne-tomate', name: 'Carne con tomate y patatas', kcal100: 140, protein100: 8.5, measure: { name: 'plato', grams: 400 } },
   { id: 'migas', name: 'Migas', kcal100: 200, protein100: 2.7, measure: { name: 'plato', grams: 300 } },
+  // Panificadora Montillana, según su etiqueta (por 100 g: 400 kcal, 11,1 g de proteína).
+  { id: ROLLS_ID, name: 'Panecillos integrales', kcal100: 400, protein100: 11.1, measure: { name: 'ración', grams: 32 } },
+  // Pepinillos, guindillas, cebollitas y 4 aceitunas negras: la ración de unos 77 g son unas 50 kcal.
+  { id: PICKLES_ID, name: 'Encurtidos variados', kcal100: 65, protein100: 1, measure: { name: 'ración', grams: 77 } },
 ];
 
 const m = (ingredientId: string, amount = 1): DishLine => ({ ingredientId, amount, unit: 'medida' });
@@ -57,7 +65,7 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: 'tostada-huevo-brocoli', slot: 'desayuno', name: 'Tostada con revuelto de huevo y brócoli', portion: '1 tostada con revuelto', notes: 'El brócoli picado y salteado con ajo', lines: [m('huevo', 2), g('brocoli', 80), m('pan'), g('aceite', 5)] },
 
   // Comidas
-  { id: 'lentejas', slot: 'comida', name: 'Lentejas', portion: '1 plato hondo', usual: true, lines: [m('lentejas')] },
+  { id: LENTILS_ID, slot: 'comida', name: 'Lentejas con patata trituradas', portion: '1 plato (434 g)', usual: true, lines: [m(LENTILS_ID)] },
   { id: 'puchero', slot: 'comida', name: 'Puchero', portion: '1 plato hondo', usual: true, lines: [m('puchero')] },
   { id: 'estofado', slot: 'comida', name: 'Estofado de ternera con patatas', portion: '1 plato hondo', usual: true, lines: [m('estofado')] },
   { id: 'carne-tomate-patatas', slot: 'comida', name: 'Carne con tomate y patatas', portion: '1 plato', usual: true, lines: [m('carne-tomate')] },
@@ -66,6 +74,8 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: 'espaguetis-pesto', slot: 'comida', name: 'Espaguetis con salsa pesto', portion: '1 plato', usual: true, lines: [g('espaguetis', 100), m('pesto', 2)] },
   { id: 'arroz-champinones-huevo', slot: 'comida', name: 'Arroz blanco con champiñones y huevo frito', portion: '1 plato + 1 huevo', usual: true, lines: [m('arroz'), m('champinones'), m('huevo'), m('aceite')] },
   { id: 'pollo-brocoli-salteado', slot: 'comida', name: 'Pollo salteado con brócoli y ajo', portion: '1 plato', notes: 'Saltea el brócoli en ramitos con ajo a fuego fuerte hasta que se dore, añade el pollo en tiras y un chorrito de soja', lines: [g('pollo', 180), g('brocoli', 200), m('aceite'), g('arroz', 60)] },
+  { id: ROLLS_ID, slot: 'comida', name: 'Panecillos integrales', portion: '1 ración (32 g)', side: true, lines: [m(ROLLS_ID)] },
+  { id: PICKLES_ID, slot: 'comida', name: 'Encurtidos', portion: 'pepinillos, guindillas, cebollitas y 4 aceitunas negras', side: true, lines: [m(PICKLES_ID)] },
   { id: 'pasta-brocoli-atun', slot: 'comida', name: 'Espaguetis con brócoli asado y atún', portion: '1 plato', notes: 'Brócoli al horno o airfryer, 200 °C 12 min con aceite y ajo', lines: [m('espaguetis'), m('brocoli'), m('atun'), m('aceite'), g('queso-rallado', 10)] },
 
   // Meriendas
