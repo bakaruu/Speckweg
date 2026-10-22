@@ -121,7 +121,20 @@ export const LENTILS_UPDATE: MenuUpdate = {
   },
 };
 
-export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE, PROTEIN_ISOLATE_UPDATE, LENTILS_UPDATE];
+/** Octubre 2026: pesado en la báscula, el cacito lleno son 32 g y vacío 5 g, así que lleva 27 g de proteína. */
+export const PROTEIN_SCOOP_UPDATE: MenuUpdate = {
+  id: '2026-10-cacito-proteina-27g',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const protein = byIdOrName(ingredients, 'proteina-soja-hsn', /prote[ií]na de soja/i);
+    if (protein) {
+      protein.measure = { name: protein.measure?.name || 'cacito', grams: 27 };
+    }
+    return { ingredients, dishes: menu.dishes };
+  },
+};
+
+export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE, PROTEIN_ISOLATE_UPDATE, LENTILS_UPDATE, PROTEIN_SCOOP_UPDATE];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
 export function applyMenuUpdates(menu: Menu, applied: string[]): { menu: Menu; applied: string[]; changed: boolean } {
