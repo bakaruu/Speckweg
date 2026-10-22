@@ -11,8 +11,8 @@ export const PICKLES_ID = 'encurtidos';
  * Valores aproximados por 100 g.
  */
 export const DEFAULT_INGREDIENTS: Ingredient[] = [
-  // HSN Soy Protein Isolate 2.0 sin sabor, según su etiqueta: el cacito de 50 ml son 30 g (117 kcal y 27 g de proteína).
-  { id: 'proteina-soja-hsn', name: 'Proteína de soja HSN', kcal100: 389, protein100: 92, measure: { name: 'cacito', grams: 30 } },
+  // HSN Soy Protein Isolate 2.0 sin sabor, según su etiqueta; el cacito de Aru, pesado, lleva 27 g (105 kcal y 25 g de proteína).
+  { id: 'proteina-soja-hsn', name: 'Proteína de soja HSN', kcal100: 389, protein100: 92, measure: { name: 'cacito', grams: 27 } },
   { id: 'avena', name: 'Copos de avena', kcal100: 375, protein100: 13, measure: { name: 'cazo', grams: 20 } },
   // Kaiku Begetal Soja sin azúcares añadidos, según su etiqueta: 32 kcal y 3,1 g de proteína por 100 ml.
   { id: SOY_MILK_ID, name: 'Leche de soja Kaiku', kcal100: 32, protein100: 3.1, measure: { name: 'vaso', grams: 300 } },
