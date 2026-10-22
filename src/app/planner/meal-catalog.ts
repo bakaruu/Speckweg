@@ -19,6 +19,8 @@ export interface MealIdea {
   proteinG: number;
   /** Plato que Aru ya suele comer. */
   usual?: boolean;
+  /** Acompañamiento: se puede apuntar, pero no se sugiere como comida. */
+  side?: boolean;
 }
 
 /** Catálogo del menú inicial, sin cambios del usuario. */

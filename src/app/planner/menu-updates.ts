@@ -1,4 +1,12 @@
-import { DEFAULT_DISHES, DEFAULT_INGREDIENTS, POST_WORKOUT_SHAKE_ID, SOY_MILK_ID } from './default-menu';
+import {
+  DEFAULT_DISHES,
+  DEFAULT_INGREDIENTS,
+  LENTILS_ID,
+  PICKLES_ID,
+  POST_WORKOUT_SHAKE_ID,
+  ROLLS_ID,
+  SOY_MILK_ID,
+} from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
 /**
@@ -75,7 +83,45 @@ export const PROTEIN_ISOLATE_UPDATE: MenuUpdate = {
   },
 };
 
-export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE, PROTEIN_ISOLATE_UPDATE];
+/**
+ * Octubre 2026: las lentejas de Aru son con patata y trituradas (sin chorizo ni morcilla) y sustituyen a las
+ * «Lentejas» de antes. Se añaden los panecillos integrales y los encurtidos como acompañamientos.
+ */
+export const LENTILS_UPDATE: MenuUpdate = {
+  id: '2026-10-lentejas-panecillos-encurtidos',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    for (const id of [LENTILS_ID, ROLLS_ID, PICKLES_ID]) {
+      if (!ingredients.some((i) => i.id === id)) {
+        ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === id)!));
+      }
+    }
+    const fromDefaults = (id: string) => structuredClone(DEFAULT_DISHES.find((d) => d.id === id)!);
+
+    // Las lentejas nuevas ocupan el sitio de las de antes.
+    const old = dishes.findIndex((d) => d.id === 'lentejas');
+    if (!dishes.some((d) => d.id === LENTILS_ID)) {
+      if (old >= 0) {
+        dishes[old] = fromDefaults(LENTILS_ID);
+      } else {
+        dishes.push(fromDefaults(LENTILS_ID));
+      }
+    } else if (old >= 0) {
+      dishes.splice(old, 1);
+    }
+    for (const id of [ROLLS_ID, PICKLES_ID]) {
+      if (!dishes.some((d) => d.id === id)) {
+        dishes.push(fromDefaults(id));
+      }
+    }
+    // El ingrediente viejo se quita si ya no lo usa ningún plato.
+    const used = new Set(dishes.flatMap((d) => d.lines.map((l) => l.ingredientId)));
+    return { ingredients: ingredients.filter((i) => i.id !== 'lentejas' || used.has(i.id)), dishes };
+  },
+};
+
+export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE, PROTEIN_ISOLATE_UPDATE, LENTILS_UPDATE];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
 export function applyMenuUpdates(menu: Menu, applied: string[]): { menu: Menu; applied: string[]; changed: boolean } {

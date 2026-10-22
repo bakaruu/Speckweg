@@ -27,6 +27,8 @@ export interface Dish {
   portion: string;
   lines: DishLine[];
   usual?: boolean;
+  /** Acompañamiento (pan, encurtidos…): se puede apuntar, pero no se sugiere como comida. */
+  side?: boolean;
 }
 
 export interface Menu {
@@ -91,6 +93,7 @@ export function toMealIdea(dish: Dish, ingredients: Ingredient[]): MealIdea {
     kcal: totals.kcal,
     proteinG: totals.proteinG,
     usual: dish.usual,
+    side: dish.side,
   };
 }
 

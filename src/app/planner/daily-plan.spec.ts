@@ -21,6 +21,14 @@ describe('daily-plan', () => {
     expect(seen.size).toBe(options.length);
   });
 
+  it('no sugiere acompañamientos como comida, aunque se puedan apuntar', () => {
+    const options = optionsFor('comida');
+    expect(options.some((m) => m.id === 'encurtidos')).toBe(true);
+    const suggested = new Set(options.map((_, i) => pickMeal(day, 'comida', i)!.id));
+    expect(suggested.has('encurtidos')).toBe(false);
+    expect(suggested.has('panecillos-integrales')).toBe(false);
+  });
+
   it('cada comida tiene al menos dos opciones', () => {
     for (const slot of MEAL_SLOTS) {
       expect(optionsFor(slot).length).toBeGreaterThanOrEqual(2);

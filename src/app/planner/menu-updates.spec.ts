@@ -1,6 +1,7 @@
 import { DEFAULT_DISHES, DEFAULT_INGREDIENTS } from './default-menu';
 import { dishTotals, Menu } from './menu-model';
-import { applyMenuUpdates, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, SOY_MILK_UPDATE } from './menu-updates';
+import { applyMenuUpdates, LENTILS_UPDATE, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, SOY_MILK_UPDATE } from './menu-updates';
+import { toMealIdea } from './menu-model';
 
 describe('applyMenuUpdates', () => {
   // Como lo tenía Aru: proteína renombrada, cacito y cazo a 50 g, y leche semidesnatada en el desayuno.
@@ -43,7 +44,7 @@ describe('applyMenuUpdates', () => {
   it('después pone la proteína con su etiqueta y el cacito a 30 g', () => {
     const { menu, applied, changed } = applyMenuUpdates(saved, []);
     expect(changed).toBe(true);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id]);
     const protein = menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')!;
     expect(protein).toEqual({ id: 'proteina-soja-hsn', name: 'Proteína de soja', kcal100: 389, protein100: 92, measure: { name: 'cacito', grams: 30 } });
     expect(menu.ingredients.find((i) => i.id === 'avena')?.measure?.grams).toBe(20);
@@ -54,7 +55,7 @@ describe('applyMenuUpdates', () => {
 
   it('solo aplica lo que falta', () => {
     const { menu, applied } = applyMenuUpdates(SOY_MILK_UPDATE.apply(saved), [SOY_MILK_UPDATE.id]);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id]);
     expect(menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')?.measure?.grams).toBe(30);
   });
 
@@ -68,5 +69,21 @@ describe('applyMenuUpdates', () => {
     const { menu } = applyMenuUpdates({ ingredients: DEFAULT_INGREDIENTS, dishes: DEFAULT_DISHES }, []);
     expect(menu.ingredients.length).toBe(DEFAULT_INGREDIENTS.length);
     expect(menu.dishes.length).toBe(DEFAULT_DISHES.length);
+  });
+
+  it('cambia las lentejas por las de patata trituradas y añade panecillos y encurtidos', () => {
+    const old: Menu = {
+      ingredients: [{ id: 'lentejas', name: 'Lentejas estofadas', kcal100: 120, protein100: 6.3, measure: { name: 'plato hondo', grams: 400 } }],
+      dishes: [{ id: 'lentejas', slot: 'comida', name: 'Lentejas', portion: '1 plato hondo', usual: true, lines: [{ ingredientId: 'lentejas', amount: 1, unit: 'medida' }] }],
+    };
+    const menu = LENTILS_UPDATE.apply(old);
+    expect(menu.ingredients.some((i) => i.id === 'lentejas')).toBe(false);
+    expect(menu.dishes.map((d) => d.id)).toEqual(['lentejas-patata-trituradas', 'panecillos-integrales', 'encurtidos']);
+    const meals = menu.dishes.map((d) => toMealIdea(d, menu.ingredients));
+    // 434 g a 80 kcal y 5 g de proteína por 100 g.
+    expect(meals[0]).toEqual(expect.objectContaining({ portionG: 434, kcal: 347, proteinG: 22, side: undefined }));
+    // 32 g a 400 kcal y 11,1 g por 100 g.
+    expect(meals[1]).toEqual(expect.objectContaining({ portionG: 32, kcal: 128, proteinG: 4, side: true }));
+    expect(meals[2]).toEqual(expect.objectContaining({ portionG: 77, kcal: 50, side: true }));
   });
 });

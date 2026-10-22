@@ -2,7 +2,7 @@ import { MEAL_CATALOG } from './meal-catalog';
 import { foodGrams, macrosFor, parseGrams } from './portions';
 
 describe('portions', () => {
-  const lentejas = MEAL_CATALOG.find((m) => m.id === 'lentejas')!;
+  const lentejas = MEAL_CATALOG.find((m) => m.id === 'lentejas-patata-trituradas')!;
 
   it('la ración habitual da los valores del catálogo', () => {
     expect(macrosFor(lentejas, lentejas.portionG)).toEqual({ kcal: lentejas.kcal, proteinG: lentejas.proteinG });
