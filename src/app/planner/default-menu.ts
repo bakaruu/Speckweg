@@ -5,6 +5,7 @@ export const POST_WORKOUT_SHAKE_ID = 'batido-post-entreno';
 export const LENTILS_ID = 'lentejas-patata-trituradas';
 export const ROLLS_ID = 'panecillos-integrales';
 export const PICKLES_ID = 'encurtidos';
+export const WINGS_ID = 'alitas-pollo';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -51,6 +52,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   { id: ROLLS_ID, name: 'Panecillos integrales', kcal100: 400, protein100: 11.1, measure: { name: 'ración', grams: 32 } },
   // Pepinillos, guindillas, cebollitas y 4 aceitunas negras: la ración de unos 77 g son unas 50 kcal.
   { id: PICKLES_ID, name: 'Encurtidos variados', kcal100: 65, protein100: 1, measure: { name: 'ración', grams: 77 } },
+  // Pesadas CON hueso, en airfryer con un poco de aceite: un 63 % es carne con piel (unas 260 kcal y 26 g por 100 g).
+  { id: WINGS_ID, name: 'Alitas de pollo (con hueso)', kcal100: 175, protein100: 16.5, measure: { name: 'pieza', grams: 27 } },
 ];
 
 const m = (ingredientId: string, amount = 1): DishLine => ({ ingredientId, amount, unit: 'medida' });
@@ -74,6 +77,7 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: 'espaguetis-pesto', slot: 'comida', name: 'Espaguetis con salsa pesto', portion: '1 plato', usual: true, lines: [g('espaguetis', 100), m('pesto', 2)] },
   { id: 'arroz-champinones-huevo', slot: 'comida', name: 'Arroz blanco con champiñones y huevo frito', portion: '1 plato + 1 huevo', usual: true, lines: [m('arroz'), m('champinones'), m('huevo'), m('aceite')] },
   { id: 'pollo-brocoli-salteado', slot: 'comida', name: 'Pollo salteado con brócoli y ajo', portion: '1 plato', notes: 'Saltea el brócoli en ramitos con ajo a fuego fuerte hasta que se dore, añade el pollo en tiras y un chorrito de soja', lines: [g('pollo', 180), g('brocoli', 200), m('aceite'), g('arroz', 60)] },
+  { id: WINGS_ID, slot: 'comida', name: 'Alitas de pollo en airfryer', portion: '10 piezas (271 g con hueso)', notes: 'Pésalas con hueso, como salen', lines: [g(WINGS_ID, 271)] },
   { id: ROLLS_ID, slot: 'comida', name: 'Panecillos integrales', portion: '1 ración (32 g)', side: true, lines: [m(ROLLS_ID)] },
   { id: PICKLES_ID, slot: 'comida', name: 'Encurtidos', portion: 'pepinillos, guindillas, cebollitas y 4 aceitunas negras', side: true, lines: [m(PICKLES_ID)] },
   { id: 'pasta-brocoli-atun', slot: 'comida', name: 'Espaguetis con brócoli asado y atún', portion: '1 plato', notes: 'Brócoli al horno o airfryer, 200 °C 12 min con aceite y ajo', lines: [m('espaguetis'), m('brocoli'), m('atun'), m('aceite'), g('queso-rallado', 10)] },

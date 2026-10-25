@@ -15,6 +15,12 @@ describe('pendingDiaryUpdates', () => {
     expect(kcal).toBe(347 + 128 + 50);
   });
 
+  it('apunta las 10 alitas del 25 de octubre', () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.date === '2026-10-25')!;
+    expect(day.items.map((i) => [i.meal.name, i.grams])).toEqual([['Alitas de pollo en airfryer', 271]]);
+    expect(macrosFor(day.items[0].meal, 271)).toEqual(expect.objectContaining({ kcal: 474 }));
+  });
+
   it('no repite lo ya apuntado', () => {
     expect(pendingDiaryUpdates(DIARY_UPDATES.map((u) => u.id), MEAL_CATALOG)).toEqual([]);
   });

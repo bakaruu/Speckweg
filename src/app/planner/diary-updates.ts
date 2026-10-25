@@ -1,4 +1,4 @@
-import { LENTILS_ID, PICKLES_ID, ROLLS_ID } from './default-menu';
+import { LENTILS_ID, PICKLES_ID, ROLLS_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -22,6 +22,12 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
       { mealId: ROLLS_ID, grams: 32 },
       { mealId: PICKLES_ID, grams: 77 },
     ],
+  },
+  {
+    // 10 alitas: 706 g en la báscula menos los 435 g del plato grande con dibujo marrón.
+    id: '2026-10-25-comida',
+    date: '2026-10-25',
+    items: [{ mealId: WINGS_ID, grams: 271 }],
   },
 ];
 
