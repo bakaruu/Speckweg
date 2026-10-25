@@ -6,6 +6,7 @@ import {
   POST_WORKOUT_SHAKE_ID,
   ROLLS_ID,
   SOY_MILK_ID,
+  WINGS_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -134,7 +135,23 @@ export const PROTEIN_SCOOP_UPDATE: MenuUpdate = {
   },
 };
 
-export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE, PROTEIN_ISOLATE_UPDATE, LENTILS_UPDATE, PROTEIN_SCOOP_UPDATE];
+/** Octubre 2026: se añaden las alitas de pollo en airfryer. */
+export const WINGS_UPDATE: MenuUpdate = {
+  id: '2026-10-alitas-pollo',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    if (!ingredients.some((i) => i.id === WINGS_ID)) {
+      ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === WINGS_ID)!));
+    }
+    if (!dishes.some((d) => d.id === WINGS_ID)) {
+      dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === WINGS_ID)!));
+    }
+    return { ingredients, dishes };
+  },
+};
+
+export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE, PROTEIN_ISOLATE_UPDATE, LENTILS_UPDATE, PROTEIN_SCOOP_UPDATE, WINGS_UPDATE];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
 export function applyMenuUpdates(menu: Menu, applied: string[]): { menu: Menu; applied: string[]; changed: boolean } {
