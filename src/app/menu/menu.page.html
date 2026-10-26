@@ -1,0 +1,212 @@
+<h1>Menú</h1>
+
+<div class="tabs">
+  <button class="secondary" [class.selected]="tab() === 'platos'" (click)="tab.set('platos')">Platos</button>
+  <button class="secondary" [class.selected]="tab() === 'ingredientes'" (click)="tab.set('ingredientes')">
+    Ingredientes y medidas
+  </button>
+</div>
+
+@if (message(); as m) {
+  <p [class.error]="m.error" [class.ok]="!m.error">{{ m.text }}</p>
+}
+
+@if (tab() === 'platos') {
+  @if (dish(); as d) {
+    <section class="card editor">
+      <h2>{{ d.id ? 'Editar plato' : 'Nuevo plato' }}</h2>
+      <div class="grid2">
+        <label>
+          Nombre
+          <input [(ngModel)]="d.name" placeholder="Por ejemplo: Batido de soja con avena" />
+        </label>
+        <label>
+          Comida del día
+          <select [(ngModel)]="d.slot">
+            @for (slot of slots; track slot) {
+              <option [value]="slot">{{ slotLabels[slot] }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Ración normal, en tus palabras
+          <input [(ngModel)]="d.portion" placeholder="1 plato hondo" />
+        </label>
+        <label class="check">
+          <input type="checkbox" [(ngModel)]="d.usual" />
+          Es de los que suelo comer
+        </label>
+      </div>
+
+      <h3>Ingredientes</h3>
+      <table class="lines">
+        <tbody>
+          @for (line of d.lines; track $index; let i = $index) {
+            <tr>
+              <td>
+                <select [(ngModel)]="line.ingredientId" (ngModelChange)="lineIngredientChanged(i)">
+                  @for (ing of menu.ingredients(); track ing.id) {
+                    <option [value]="ing.id">{{ ing.name }}</option>
+                  }
+                </select>
+              </td>
+              <td>
+                <input class="amount" type="number" min="0" [step]="line.unit === 'g' ? 5 : 0.25" [(ngModel)]="line.amount" />
+              </td>
+              <td>
+                <select [(ngModel)]="line.unit">
+                  @if (ingredientById(line.ingredientId)?.measure; as measure) {
+                    <option value="medida">{{ measure.name }} ({{ measure.grams }} g)</option>
+                  }
+                  <option value="g">gramos</option>
+                </select>
+              </td>
+              <td class="muted">{{ lineAmountLabel(line, ingredientById(line.ingredientId)) }}</td>
+              <td><button class="secondary" (click)="removeLine(i)" title="Quitar">Quitar</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <button class="secondary" (click)="addLine()">Añadir ingrediente</button>
+      <p class="muted small">
+        ¿Falta un ingrediente o tu cacito no pesa eso? Créalo o cámbialo en «Ingredientes y medidas».
+      </p>
+
+      <label>
+        Cómo se hace (opcional)
+        <textarea rows="2" [(ngModel)]="d.notes"></textarea>
+      </label>
+
+      <p class="totals">
+        Total: <strong>{{ totals(d).proteinG }} g de proteína</strong> · {{ totals(d).kcal }} kcal ·
+        {{ totals(d).grams }} g
+      </p>
+      <div class="actions">
+        <button (click)="saveDish()">Guardar</button>
+        <button class="secondary" (click)="dish.set(null)">Cancelar</button>
+      </div>
+    </section>
+  }
+
+  @for (slot of slots; track slot) {
+    <section class="card">
+      <header>
+        <h2>{{ slotLabels[slot] }}</h2>
+        <button class="secondary" (click)="newDish(slot)">Nuevo plato</button>
+      </header>
+      <ul class="list">
+        @for (item of dishesFor(slot); track item.id) {
+          <li>
+            <div class="info">
+              <strong>
+                {{ item.name }}
+                @if (item.usual) {
+                  <span class="tag">De los tuyos</span>
+                }
+              </strong>
+              <span class="muted small">
+                @for (line of item.lines; track $index; let last = $last) {
+                  {{ ingredientById(line.ingredientId)?.name }} {{ lineAmountLabel(line, ingredientById(line.ingredientId)) }}{{ last ? '' : ', ' }}
+                }
+              </span>
+            </div>
+            <div class="macros">
+              <strong>{{ totals(item).proteinG }} g</strong>
+              <span class="muted">{{ totals(item).kcal }} kcal</span>
+            </div>
+            <div class="actions">
+              <button class="secondary" (click)="editDish(item)">Editar</button>
+              <button class="secondary" (click)="duplicateDish(item)">Duplicar</button>
+              <button class="secondary danger" (click)="deleteDish(item)">
+                {{ confirmDelete() === item.id ? '¿Seguro?' : 'Borrar' }}
+              </button>
+            </div>
+          </li>
+        } @empty {
+          <li class="muted">No hay platos. Crea uno con «Nuevo plato».</li>
+        }
+      </ul>
+    </section>
+  }
+} @else {
+  @if (ingredient(); as d) {
+    <section class="card editor">
+      <h2>{{ d.id ? 'Editar ingrediente' : 'Nuevo ingrediente' }}</h2>
+      <div class="grid2">
+        <label>
+          Nombre
+          <input [(ngModel)]="d.name" placeholder="Por ejemplo: Copos de avena" />
+        </label>
+        <span></span>
+        <label>
+          kcal por 100 g
+          <input type="number" min="0" [(ngModel)]="d.kcal100" />
+        </label>
+        <label>
+          Proteína por 100 g
+          <input type="number" min="0" step="0.1" [(ngModel)]="d.protein100" />
+        </label>
+        <label>
+          Tu medida casera (opcional)
+          <input [(ngModel)]="d.measureName" placeholder="cacito, cazo, loncha…" />
+        </label>
+        <label>
+          Cuántos gramos tiene
+          <input type="number" min="0" [(ngModel)]="d.measureGrams" placeholder="Pésala una vez" />
+        </label>
+      </div>
+      @if (perMeasure(d); as p) {
+        <p class="muted">
+          1 {{ d.measureName || 'medida' }} = {{ d.measureGrams }} g → {{ p.kcal }} kcal y {{ formatNumber(p.proteinG) }} g de
+          proteína.
+        </p>
+      }
+      <div class="actions">
+        <button (click)="saveIngredient()">Guardar</button>
+        <button class="secondary" (click)="ingredient.set(null)">Cancelar</button>
+      </div>
+    </section>
+  }
+
+  <section class="card">
+    <header>
+      <div>
+        <h2>Ingredientes y medidas</h2>
+        <p class="muted small">
+          Si pesas tu cacito o tu cazo, cambia aquí sus gramos y todos los platos se recalculan solos.
+        </p>
+      </div>
+      <button class="secondary" (click)="newIngredient()">Nuevo ingrediente</button>
+    </header>
+    <ul class="list">
+      @for (item of menu.ingredients(); track item.id) {
+        <li>
+          <div class="info">
+            <strong>{{ item.name }}</strong>
+            <span class="muted small">
+              {{ formatNumber(item.kcal100) }} kcal · {{ formatNumber(item.protein100) }} g proteína por 100 g
+            </span>
+          </div>
+          <div class="macros">
+            @if (item.measure; as measure) {
+              <strong>1 {{ measure.name }}</strong>
+              <span class="muted">{{ measure.grams }} g</span>
+            }
+          </div>
+          <div class="actions">
+            <button class="secondary" (click)="editIngredient(item)">Editar</button>
+            <button class="secondary danger" (click)="deleteIngredient(item)">
+              {{ confirmDelete() === item.id ? '¿Seguro?' : 'Borrar' }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+<p class="reset">
+  <button class="secondary danger" (click)="reset()">
+    {{ confirmReset() ? '¿Seguro? Se pierden tus cambios' : 'Volver al menú inicial' }}
+  </button>
+</p>

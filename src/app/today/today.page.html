@@ -1,12 +1,53 @@
-<h1>Hoy</h1>
+<div class="day-nav">
+  <button class="secondary arrow" (click)="moveDay(-1)" aria-label="Día anterior" title="Día anterior">‹</button>
+  <div class="title-wrap">
+    <button class="title" (click)="toggleCalendar()" [attr.aria-expanded]="calendarOpen()" title="Elegir día">
+      <h1>{{ title() }}</h1>
+      <span class="muted caret">▾</span>
+    </button>
+    @if (calendarOpen()) {
+      <div class="backdrop" (click)="calendarOpen.set(false)"></div>
+      <app-month-calendar
+        class="popover"
+        [start]="date()"
+        [selected]="dateIso()"
+        [max]="todayIso"
+        [marked]="marked()"
+        (pick)="pickDay($event)"
+      />
+    }
+  </div>
+  <button
+    class="secondary arrow"
+    (click)="moveDay(1)"
+    [disabled]="isToday()"
+    aria-label="Día siguiente"
+    title="Día siguiente"
+  >
+    ›
+  </button>
+  @if (!isToday()) {
+    <button class="secondary" (click)="goToday()">Hoy</button>
+  }
+</div>
 
-<app-workouts-card />
+<div class="columns">
+<div class="col">
+<app-balance-card [eatenKcal]="eaten().kcal" [eatenProteinG]="eaten().proteinG" [date]="date()" />
 
+<app-weight-card />
+
+<app-creatine-card [date]="date()" />
+
+<app-workouts-card [date]="date()" />
+</div>
+
+<div class="col">
 <section class="card day">
   <header>
     <div>
-      <p class="date">{{ dateLabel }}</p>
-      <p class="muted">Platos recomendados para hoy</p>
+      <p class="date">{{ dateLabel() }}</p>
+      <p class="muted">Platos recomendados para {{ isToday() ? 'hoy' : 'ese día' }}</p>
     </div>
     <div class="target">
       <span class="big">{{ total().proteinG }} / {{ proteinTarget() }} g</span>
@@ -25,7 +66,7 @@
     </p>
   } @else if (total().proteinG < proteinTarget()) {
     <p class="muted hint">
-      Te faltan {{ proteinTarget() - total().proteinG }} g de proteína: añade otro batido de soja (unos 26 g por
+      Te faltan {{ proteinTarget() - total().proteinG }} g de proteína: añade otro batido de soja (unos 27 g por
       cacito) o una ración más grande en la comida.
     </p>
   }
@@ -67,26 +108,62 @@
             </label>
 
             @if (formMeal(); as meal) {
-              <p class="muted small">¿Cuánto, a ojo? La ración normal es {{ meal.portion }}.</p>
-              <div class="sizes">
-                @for (p of portionSizes; track p.size) {
-                  <button
-                    class="secondary"
-                    [class.selected]="form()?.amount?.kind === 'size' && $any(form()?.amount).size === p.size"
-                    (click)="chooseAmount({ kind: 'size', size: p.size }); grams.value = ''"
-                  >
-                    {{ p.label }} <span class="muted">· {{ sizeKcal(meal, p.size) }} kcal</span>
+              @if (formContainer(); as c) {
+                <label class="grams">
+                  Lo que marca la báscula con «{{ c.name }}»
+                  <input
+                    #scale
+                    type="number"
+                    min="1"
+                    inputmode="numeric"
+                    [placeholder]="'Más de ' + c.grams + ' g'"
+                    (input)="typeScale(scale.value)"
+                  />
+                </label>
+              } @else {
+                <label class="grams">
+                  ¿Cuántos gramos de comida?
+                  <input
+                    #grams
+                    type="number"
+                    min="1"
+                    inputmode="numeric"
+                    [value]="form()?.grams"
+                    (input)="typeGrams(grams.value)"
+                  />
+                </label>
+                <p class="muted small">Tu ración habitual, {{ meal.portion }}, son unos {{ meal.portionG }} g.</p>
+              }
+
+              @if (containers.list().length > 0) {
+                <p class="small">Pesado con…</p>
+                <div class="containers">
+                  <button class="secondary" [class.selected]="!form()?.containerId" (click)="chooseContainer(undefined)">
+                    Sin plato (o con tara)
                   </button>
-                }
-              </div>
-              <label class="grams">
-                O, si lo has pesado, en gramos
-                <input #grams type="number" min="1" inputmode="numeric" placeholder="Opcional" (input)="typeGrams(grams.value)" />
-              </label>
+                  @for (c of containers.list(); track c.id) {
+                    <button
+                      class="secondary container"
+                      [class.selected]="form()?.containerId === c.id"
+                      (click)="chooseContainer(c.id)"
+                    >
+                      @if (c.photo) {
+                        <img [src]="c.photo" alt="" />
+                      }
+                      <span>{{ c.name }} <span class="muted">· {{ c.grams }} g</span></span>
+                    </button>
+                  }
+                </div>
+              } @else {
+                <p class="muted small">
+                  ¿Lo pesas con el plato puesto? Guarda tus platos en <a routerLink="/ajustes">Ajustes → Mis recipientes</a>
+                  y se resta solo.
+                </p>
+              }
 
               @if (formPreview(); as p) {
                 <p>
-                  Se apuntan unos <strong>{{ p.grams }} g</strong>: {{ p.proteinG }} g de proteína · {{ p.kcal }} kcal
+                  Se apuntan <strong>{{ p.grams }} g</strong> de comida: {{ p.proteinG }} g de proteína · {{ p.kcal }} kcal
                 </p>
               }
               <div class="actions">
@@ -100,13 +177,13 @@
     }
   </ul>
 
-  <p class="muted note">Valores aproximados por ración.</p>
+  <p class="muted note">Valores aproximados por ración. Puedes cambiar platos, cantidades y medidas en <a routerLink="/menu">Menú</a>.</p>
 </section>
 
 <section class="card day">
   <header>
     <div>
-      <h2>Lo que has comido hoy</h2>
+      <h2>{{ isToday() ? 'Lo que has comido hoy' : 'Lo que comiste ese día' }}</h2>
       <p class="muted">
         {{ eaten().kcal }} kcal · {{ eaten().proteinG }} g proteína · {{ eaten().carbsG }} g hidratos ·
         {{ eaten().fatG }} g grasa
@@ -128,7 +205,7 @@
 
   @if (searchOpen()) {
     <app-food-search
-      [date]="todayIso"
+      [date]="dateIso()"
       [slotLabels]="slotLabels"
       (logged)="loadEntries()"
       (closed)="searchOpen.set(false)"
@@ -177,3 +254,5 @@
     </p>
   }
 </section>
+</div>
+</div>

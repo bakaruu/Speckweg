@@ -59,19 +59,8 @@ jobs:
             beta.version = base + '-beta.' + process.env.GITHUB_RUN_NUMBER;
             fs.writeFileSync(p, JSON.stringify(beta, null, 2));
             console.log('Versión beta:', beta.version);
+            fs.appendFileSync(process.env.GITHUB_ENV, 'BETA_VERSION=' + beta.version + '\\n');
           "
-
-      # La release "beta" se reutiliza: se borran los instaladores anteriores para dejar solo el último.
-      - name: Limpiar la release beta anterior
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if gh release view beta >/dev/null 2>&1; then
-            gh release view beta --json assets --jq '.assets[].name' | while IFS= read -r asset; do
-              gh release delete-asset beta "$asset" --yes
-            done
-          fi
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -86,3 +75,16 @@ jobs:
           releaseDraft: false
           prerelease: true
           includeUpdaterJson: true
+
+      # La release "beta" se reutiliza. Los instaladores viejos se borran DESPUÉS de subir el nuevo,
+      # para que latest.json nunca apunte a un archivo que no existe mientras se compila.
+      - name: Borrar instaladores beta anteriores
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view beta --json assets --jq '.assets[].name' | while IFS= read -r asset; do
+            if [ "$asset" != "latest.json" ] && [[ "$asset" != *"_${BETA_VERSION}_"* ]]; then
+              gh release delete-asset beta "$asset" --yes
+            fi
+          done

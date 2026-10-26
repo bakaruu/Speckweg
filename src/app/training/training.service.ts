@@ -1,8 +1,11 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
 import { DatabaseService } from '../core/db/database.service';
+import { isoDate } from '../planner/daily-plan';
 import { SettingsService } from '../core/settings/settings.service';
 import { HevyClient, HevyWorkout } from './hevy.client';
+import { mergeEnergy, parseDailyTotals, withoutFirstDay } from '../core/energy/energy';
+import { parseWeightFile } from '../core/profile/body';
 import { kcalDuring, parseEnergyFile } from './apple-health';
 import { DEFAULT_WEIGHT_KG, estimateKcal, parseHevyCsv, summarize } from './workout';
 
@@ -22,6 +25,8 @@ export class TrainingService {
   readonly version = signal(0);
 
   private startup?: Promise<string[]>;
+  private watchingFocus = false;
+  private lastFocusRead = 0;
 
   /**
    * Sincroniza una sola vez al abrir la app: Hevy (si hay API key) y luego las kcal del Apple Watch.
@@ -33,6 +38,25 @@ export class TrainingService {
       return this.refresh(!!(await this.settings.getHevyApiKey()));
     })();
     return this.startup;
+  }
+
+  /**
+   * Al volver a la ventana de la app, vuelve a leer los archivos del Atajo (kcal, peso y gasto del día)
+   * por si se ha ejecutado en el iPhone. Como mucho una vez cada 30 s y sin llamar a Hevy; los errores
+   * se ven al pulsar «Sincronizar».
+   */
+  watchFocus(): void {
+    if (this.watchingFocus || typeof window === 'undefined') {
+      return;
+    }
+    this.watchingFocus = true;
+    window.addEventListener('focus', () => {
+      if (Date.now() - this.lastFocusRead < 30_000) {
+        return;
+      }
+      this.lastFocusRead = Date.now();
+      void this.refresh(false);
+    });
   }
 
   /** Hevy y Apple Watch, uno detrás de otro. Devuelve los mensajes de error, si los hay. */
@@ -50,6 +74,16 @@ export class TrainingService {
     } catch (e) {
       errors.push(`No se pudieron leer las kcal del Apple Watch: ${errorText(e)}`);
     }
+    try {
+      await this.syncWeight();
+    } catch (e) {
+      errors.push(`No se pudo leer el peso de Salud: ${errorText(e)}`);
+    }
+    try {
+      await this.syncEnergyDays();
+    } catch (e) {
+      errors.push(`No se pudo leer el gasto del día de Salud: ${errorText(e)}`);
+    }
     return errors;
   }
 
@@ -65,6 +99,63 @@ export class TrainingService {
       return undefined;
     }
     return { path: file.path, updated: await this.applyEnergy(file.content) };
+  }
+
+  /**
+   * Lee el peso que deja el Atajo en peso.txt (la báscula lo manda a Salud) y lo añade al histórico.
+   * Devuelve cuántos pesos se han leído, o undefined si no hay archivo.
+   */
+  async syncWeight(): Promise<number | undefined> {
+    const customPath = await this.settings.getHealthFilePath();
+    const file = await invoke<{ path: string; content: string } | null>('read_health_file', {
+      // Si hay una ruta a mano para energia.txt, peso.txt está en la misma carpeta.
+      customPath: customPath ? customPath.replace(/[^\\/]+$/, 'peso.txt') : null,
+      fileName: 'peso.txt',
+    });
+    if (!file) {
+      return undefined;
+    }
+    const entries = parseWeightFile(file.content);
+    if (entries.length > 0) {
+      await this.settings.addWeights(entries);
+      this.version.update((v) => v + 1);
+    }
+    return entries.length;
+  }
+
+  /**
+   * Lee el gasto de cada día que deja el Atajo: reposo.txt (energía en reposo) y actividad.txt
+   * (energía en actividad). Sin actividad.txt, suma las muestras de energia.txt.
+   * Devuelve cuántos días se han leído, o undefined si no hay ningún archivo.
+   */
+  async syncEnergyDays(): Promise<number | undefined> {
+    const resting = await this.readHealthFile('reposo.txt');
+    const active = await this.readHealthFile('actividad.txt');
+    const samples = active === undefined ? await this.readHealthFile('energia.txt') : undefined;
+    if (resting === undefined && active === undefined && samples === undefined) {
+      return undefined;
+    }
+    let log = await this.settings.getEnergyLog();
+    const restingDays = parseDailyTotals(resting ?? '');
+    const activeDays =
+      active !== undefined
+        ? parseDailyTotals(active)
+        : withoutFirstDay(parseDailyTotals(samples ?? ''));
+    log = mergeEnergy(log, restingDays, 'restingKcal');
+    log = mergeEnergy(log, activeDays, 'activeKcal');
+    await this.settings.setEnergyLog(log);
+    this.version.update((v) => v + 1);
+    return new Set([...restingDays.keys(), ...activeDays.keys()]).size;
+  }
+
+  /** Un archivo de la carpeta Speckweg del Atajo (o de la carpeta de la ruta puesta a mano). */
+  private async readHealthFile(fileName: string): Promise<string | undefined> {
+    const customPath = await this.settings.getHealthFilePath();
+    const file = await invoke<{ path: string; content: string } | null>('read_health_file', {
+      customPath: customPath ? customPath.replace(/[^\\/]+$/, fileName) : null,
+      fileName,
+    });
+    return file?.content;
   }
 
   /** Igual que syncWatch, pero con un archivo elegido a mano. Devuelve cuántos entrenos han cambiado. */
@@ -155,6 +246,12 @@ export class TrainingService {
       [from.toISOString(), to.toISOString()],
     );
     return rows.map((r) => JSON.parse(r.raw_json) as HevyWorkout);
+  }
+
+  /** Días (YYYY-MM-DD, hora local) con algún entreno guardado. */
+  async workoutDates(): Promise<string[]> {
+    const rows = await this.db.select<{ start_time: string }>(`SELECT start_time FROM workout`);
+    return rows.map((r) => isoDate(new Date(r.start_time)));
   }
 
   /** El último entreno guardado, sea del día que sea. */

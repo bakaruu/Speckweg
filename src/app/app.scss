@@ -1,6 +1,6 @@
 :host {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 200px minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -11,6 +11,12 @@ nav {
   padding: 16px;
   background: var(--surface);
   border-right: 1px solid var(--border);
+  /* El menú se queda fijo al bajar por la página. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .brand {
@@ -33,6 +39,22 @@ nav a.active {
 
 main {
   padding: 24px 32px;
+  min-width: 0;
+}
+
+/* Ventana estrecha: menú más fino y menos margen. */
+@media (max-width: 760px) {
+  :host {
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
+
+  nav {
+    padding: 12px 8px;
+  }
+
+  main {
+    padding: 16px;
+  }
 }
 
 .beta {
