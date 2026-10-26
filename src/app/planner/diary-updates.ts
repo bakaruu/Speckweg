@@ -1,4 +1,4 @@
-import { LENTILS_ID, PICKLES_ID, ROLLS_ID, WINGS_ID } from './default-menu';
+import { LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -28,6 +28,21 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
     id: '2026-10-25-comida',
     date: '2026-10-25',
     items: [{ mealId: WINGS_ID, grams: 271 }],
+  },
+  {
+    // Desayuno: 2 tostadas con crema de cacahuete.
+    id: '2026-10-26-desayuno',
+    date: '2026-10-26',
+    items: [{ mealId: PEANUT_TOAST_ID, grams: 100 }],
+  },
+  {
+    // Medio bocata de carne en salsa y el estofado: 773 g en la báscula menos los 396 g del plato hondo.
+    id: '2026-10-26-comida',
+    date: '2026-10-26',
+    items: [
+      { mealId: MEAT_SANDWICH_ID, grams: 170 },
+      { mealId: STEW_ID, grams: 377 },
+    ],
   },
 ];
 
