@@ -1,6 +1,6 @@
 import { DEFAULT_DISHES, DEFAULT_INGREDIENTS } from './default-menu';
 import { dishTotals, Menu } from './menu-model';
-import { applyMenuUpdates, LENTILS_UPDATE, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, PROTEIN_SCOOP_UPDATE, SOY_MILK_UPDATE, WINGS_UPDATE } from './menu-updates';
+import { applyMenuUpdates, LENTILS_UPDATE, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, PROTEIN_SCOOP_UPDATE, SOY_MILK_UPDATE, STEW_TOAST_SANDWICH_UPDATE, WINGS_UPDATE } from './menu-updates';
 import { toMealIdea } from './menu-model';
 
 describe('applyMenuUpdates', () => {
@@ -44,7 +44,7 @@ describe('applyMenuUpdates', () => {
   it('después pone la proteína con su etiqueta y el cacito a 27 g (pesado)', () => {
     const { menu, applied, changed } = applyMenuUpdates(saved, []);
     expect(changed).toBe(true);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id]);
     const protein = menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')!;
     expect(protein).toEqual({ id: 'proteina-soja-hsn', name: 'Proteína de soja', kcal100: 389, protein100: 92, measure: { name: 'cacito', grams: 27 } });
     expect(menu.ingredients.find((i) => i.id === 'avena')?.measure?.grams).toBe(20);
@@ -55,7 +55,7 @@ describe('applyMenuUpdates', () => {
 
   it('solo aplica lo que falta', () => {
     const { menu, applied } = applyMenuUpdates(SOY_MILK_UPDATE.apply(saved), [SOY_MILK_UPDATE.id]);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id]);
     expect(menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')?.measure?.grams).toBe(27);
   });
 
@@ -93,5 +93,15 @@ describe('applyMenuUpdates', () => {
     // 271 g a 175 kcal y 16,5 g de proteína por 100 g.
     expect(wings).toEqual(expect.objectContaining({ name: 'Alitas de pollo en airfryer', portionG: 271, kcal: 474, proteinG: 45 }));
     expect(WINGS_UPDATE.apply(menu)).toEqual(menu);
+  });
+
+  it('pone el estofado caldoso de Aru y añade las tostadas y el medio bocata', () => {
+    const old = { ingredients: [{ id: 'estofado', name: 'Estofado de ternera con patatas', kcal100: 138, protein100: 8.8, measure: { name: 'plato hondo', grams: 400 } }], dishes: [] };
+    const menu = STEW_TOAST_SANDWICH_UPDATE.apply(old);
+    const meal = (id: string) => toMealIdea(menu.dishes.find((d) => d.id === id)!, menu.ingredients);
+    expect(meal('estofado')).toEqual(expect.objectContaining({ portionG: 377, kcal: 339, proteinG: 22 }));
+    expect(meal('tostadas-crema-cacahuete')).toEqual(expect.objectContaining({ slot: 'desayuno', portionG: 100, kcal: 326, proteinG: 12 }));
+    expect(meal('medio-bocata-carne-salsa')).toEqual(expect.objectContaining({ portionG: 170, kcal: 343, proteinG: 19 }));
+    expect(STEW_TOAST_SANDWICH_UPDATE.apply(menu)).toEqual(menu);
   });
 });

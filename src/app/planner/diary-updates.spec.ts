@@ -21,6 +21,18 @@ describe('pendingDiaryUpdates', () => {
     expect(macrosFor(day.items[0].meal, 271)).toEqual(expect.objectContaining({ kcal: 474 }));
   });
 
+  it('apunta el desayuno y la comida del 26 de octubre', () => {
+    const days = pendingDiaryUpdates([], MEAL_CATALOG).filter((u) => u.date === '2026-10-26');
+    const items = days.flatMap((d) => d.items);
+    expect(items.map((i) => [i.meal.name, i.grams])).toEqual([
+      ['Tostadas con crema de cacahuete', 100],
+      ['Medio bocata de carne en salsa', 170],
+      ['Estofado de ternera con patatas', 377],
+    ]);
+    const kcal = items.reduce((sum, i) => sum + macrosFor(i.meal, i.grams).kcal, 0);
+    expect(kcal).toBe(326 + 343 + 339);
+  });
+
   it('no repite lo ya apuntado', () => {
     expect(pendingDiaryUpdates(DIARY_UPDATES.map((u) => u.id), MEAL_CATALOG)).toEqual([]);
   });

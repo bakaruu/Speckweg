@@ -7,6 +7,9 @@ import {
   ROLLS_ID,
   SOY_MILK_ID,
   WINGS_ID,
+  STEW_ID,
+  PEANUT_TOAST_ID,
+  MEAT_SANDWICH_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -151,7 +154,46 @@ export const WINGS_UPDATE: MenuUpdate = {
   },
 };
 
-export const MENU_UPDATES: MenuUpdate[] = [SOY_MILK_UPDATE, PROTEIN_ISOLATE_UPDATE, LENTILS_UPDATE, PROTEIN_SCOOP_UPDATE, WINGS_UPDATE];
+/**
+ * Octubre 2026: el estofado de Aru es caldoso y con mucha patata (90 kcal y 5,8 g por 100 g) y se añaden
+ * las tostadas con crema de cacahuete y el medio bocata de carne en salsa.
+ */
+export const STEW_TOAST_SANDWICH_UPDATE: MenuUpdate = {
+  id: '2026-10-estofado-tostadas-bocata',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    const fromDefaults = (id: string) => structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === id)!);
+    const stew = byIdOrName(ingredients, STEW_ID, /^estofado/i);
+    if (stew) {
+      stew.kcal100 = 90;
+      stew.protein100 = 5.8;
+      stew.measure = { name: stew.measure?.name || 'plato hondo', grams: 377 };
+    } else {
+      ingredients.push(fromDefaults(STEW_ID));
+    }
+    for (const id of ['pan', 'crema-cacahuete', 'carne-salsa']) {
+      if (!ingredients.some((i) => i.id === id)) {
+        ingredients.push(fromDefaults(id));
+      }
+    }
+    for (const id of [STEW_ID, PEANUT_TOAST_ID, MEAT_SANDWICH_ID]) {
+      if (!dishes.some((d) => d.id === id)) {
+        dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === id)!));
+      }
+    }
+    return { ingredients, dishes };
+  },
+};
+
+export const MENU_UPDATES: MenuUpdate[] = [
+  SOY_MILK_UPDATE,
+  PROTEIN_ISOLATE_UPDATE,
+  LENTILS_UPDATE,
+  PROTEIN_SCOOP_UPDATE,
+  WINGS_UPDATE,
+  STEW_TOAST_SANDWICH_UPDATE,
+];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
 export function applyMenuUpdates(menu: Menu, applied: string[]): { menu: Menu; applied: string[]; changed: boolean } {

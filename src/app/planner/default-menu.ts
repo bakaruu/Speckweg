@@ -6,6 +6,9 @@ export const LENTILS_ID = 'lentejas-patata-trituradas';
 export const ROLLS_ID = 'panecillos-integrales';
 export const PICKLES_ID = 'encurtidos';
 export const WINGS_ID = 'alitas-pollo';
+export const STEW_ID = 'estofado';
+export const PEANUT_TOAST_ID = 'tostadas-crema-cacahuete';
+export const MEAT_SANDWICH_ID = 'medio-bocata-carne-salsa';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -45,7 +48,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   // Las de Aru: solo lentejas y patata, sin chorizo ni morcilla, y trituradas. El plato de siempre son 434 g.
   { id: LENTILS_ID, name: 'Lentejas con patata trituradas', kcal100: 80, protein100: 5, measure: { name: 'plato', grams: 434 } },
   { id: 'puchero', name: 'Puchero', kcal100: 144, protein100: 8.9, measure: { name: 'plato hondo', grams: 450 } },
-  { id: 'estofado', name: 'Estofado de ternera con patatas', kcal100: 138, protein100: 8.8, measure: { name: 'plato hondo', grams: 400 } },
+  // El de Aru lleva mucho caldo y mucha patata: unas 90 kcal y 5,8 g de proteína por 100 g. Su plato hondo, 377 g.
+  { id: STEW_ID, name: 'Estofado de ternera con patatas', kcal100: 90, protein100: 5.8, measure: { name: 'plato hondo', grams: 377 } },
   { id: 'carne-tomate', name: 'Carne con tomate y patatas', kcal100: 140, protein100: 8.5, measure: { name: 'plato', grams: 400 } },
   { id: 'migas', name: 'Migas', kcal100: 200, protein100: 2.7, measure: { name: 'plato', grams: 300 } },
   // Panificadora Montillana, según su etiqueta (por 100 g: 400 kcal, 11,1 g de proteína).
@@ -54,6 +58,9 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   { id: PICKLES_ID, name: 'Encurtidos variados', kcal100: 65, protein100: 1, measure: { name: 'ración', grams: 77 } },
   // Pesadas CON hueso, en airfryer con un poco de aceite: un 63 % es carne con piel (unas 260 kcal y 26 g por 100 g).
   { id: WINGS_ID, name: 'Alitas de pollo (con hueso)', kcal100: 175, protein100: 16.5, measure: { name: 'pieza', grams: 27 } },
+  { id: 'crema-cacahuete', name: 'Crema de cacahuete', kcal100: 590, protein100: 25, measure: { name: 'cucharadita', grams: 10 } },
+  // Carne guisada en salsa (ternera o cerdo), ya hecha.
+  { id: 'carne-salsa', name: 'Carne en salsa', kcal100: 150, protein100: 13, measure: { name: 'ración', grams: 90 } },
 ];
 
 const m = (ingredientId: string, amount = 1): DishLine => ({ ingredientId, amount, unit: 'medida' });
@@ -64,13 +71,14 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: 'avena-leche-platano', slot: 'desayuno', name: 'Avena con leche y plátano', portion: '1 tazón', notes: 'Con canela', lines: [m('avena', 2), g(SOY_MILK_ID, 250), m('platano')] },
   { id: 'batido-soja-avena-platano', slot: 'desayuno', name: 'Batido de soja con avena y plátano', portion: '1 vaso grande', lines: [m('proteina-soja-hsn'), g('avena', 40), m('platano'), g(SOY_MILK_ID, 300)] },
   { id: 'tostadas-tomate-pavo', slot: 'desayuno', name: 'Tostadas con tomate y pavo', portion: '2 tostadas', lines: [m('pan', 2), m('tomate', 2), m('aceite'), m('pavo', 4)] },
+  { id: PEANUT_TOAST_ID, slot: 'desayuno', name: 'Tostadas con crema de cacahuete', portion: '2 tostadas', lines: [m('pan', 2), m('crema-cacahuete', 2)] },
   { id: 'yogur-fruta-avena', slot: 'desayuno', name: 'Yogur con fruta y avena', portion: '1 bol', lines: [m('yogur', 2), m('fruta'), g('avena', 30)] },
   { id: 'tostada-huevo-brocoli', slot: 'desayuno', name: 'Tostada con revuelto de huevo y brócoli', portion: '1 tostada con revuelto', notes: 'El brócoli picado y salteado con ajo', lines: [m('huevo', 2), g('brocoli', 80), m('pan'), g('aceite', 5)] },
 
   // Comidas
   { id: LENTILS_ID, slot: 'comida', name: 'Lentejas con patata trituradas', portion: '1 plato (434 g)', usual: true, lines: [m(LENTILS_ID)] },
   { id: 'puchero', slot: 'comida', name: 'Puchero', portion: '1 plato hondo', usual: true, lines: [m('puchero')] },
-  { id: 'estofado', slot: 'comida', name: 'Estofado de ternera con patatas', portion: '1 plato hondo', usual: true, lines: [m('estofado')] },
+  { id: STEW_ID, slot: 'comida', name: 'Estofado de ternera con patatas', portion: '1 plato hondo', usual: true, lines: [m('estofado')] },
   { id: 'carne-tomate-patatas', slot: 'comida', name: 'Carne con tomate y patatas', portion: '1 plato', usual: true, lines: [m('carne-tomate')] },
   { id: 'pollo-pure', slot: 'comida', name: 'Filetes de pollo a la plancha con puré de patatas', portion: '2 filetes + 1 cazo de puré', usual: true, lines: [m('pollo', 2), m('pure'), m('aceite')] },
   { id: 'migas-sardinas-melon', slot: 'comida', name: 'Migas con sardinas y melón', portion: '1 plato + 2 sardinas', usual: true, lines: [m('migas'), m('sardina', 2), m('melon')] },
@@ -78,6 +86,7 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: 'arroz-champinones-huevo', slot: 'comida', name: 'Arroz blanco con champiñones y huevo frito', portion: '1 plato + 1 huevo', usual: true, lines: [m('arroz'), m('champinones'), m('huevo'), m('aceite')] },
   { id: 'pollo-brocoli-salteado', slot: 'comida', name: 'Pollo salteado con brócoli y ajo', portion: '1 plato', notes: 'Saltea el brócoli en ramitos con ajo a fuego fuerte hasta que se dore, añade el pollo en tiras y un chorrito de soja', lines: [g('pollo', 180), g('brocoli', 200), m('aceite'), g('arroz', 60)] },
   { id: WINGS_ID, slot: 'comida', name: 'Alitas de pollo en airfryer', portion: '10 piezas (271 g con hueso)', notes: 'Pésalas con hueso, como salen', lines: [g(WINGS_ID, 271)] },
+  { id: MEAT_SANDWICH_ID, slot: 'comida', name: 'Medio bocata de carne en salsa', portion: '½ barra con su carne', lines: [m('pan', 2), m('carne-salsa')] },
   { id: ROLLS_ID, slot: 'comida', name: 'Panecillos integrales', portion: '1 ración (32 g)', side: true, lines: [m(ROLLS_ID)] },
   { id: PICKLES_ID, slot: 'comida', name: 'Encurtidos', portion: 'pepinillos, guindillas, cebollitas y 4 aceitunas negras', side: true, lines: [m(PICKLES_ID)] },
   { id: 'pasta-brocoli-atun', slot: 'comida', name: 'Espaguetis con brócoli asado y atún', portion: '1 plato', notes: 'Brócoli al horno o airfryer, 200 °C 12 min con aceite y ajo', lines: [m('espaguetis'), m('brocoli'), m('atun'), m('aceite'), g('queso-rallado', 10)] },
