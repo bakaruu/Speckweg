@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, OnInit, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DiaryRow, DiaryService } from '../core/diary/diary.service';
+import { addMacros, NO_MACROS } from '../core/foods/food';
 import { BalanceCard } from '../core/energy/balance-card';
 import { WeightCard } from '../core/profile/weight-card';
 import { CreatineCard } from '../core/supplements/creatine-card';
@@ -15,6 +16,7 @@ import { TrainingService } from '../training/training.service';
 import { WorkoutsCard } from '../training/workouts-card';
 import { addDays, startOfDay } from './calendar';
 import { MonthCalendar } from './month-calendar';
+import { FoodSearchComponent } from './food-search/food-search.component';
 
 const SLOT_LABELS: Record<MealSlot, string> = {
   desayuno: 'Desayuno',
@@ -37,7 +39,7 @@ interface LogForm {
 
 @Component({
   selector: 'app-today-page',
-  imports: [RouterLink, BalanceCard, CreatineCard, WeightCard, WorkoutsCard, MonthCalendar],
+  imports: [RouterLink, BalanceCard, CreatineCard, WeightCard, WorkoutsCard, MonthCalendar, FoodSearchComponent],
   templateUrl: './today.page.html',
   styleUrl: './today.page.scss',
 })
@@ -88,12 +90,15 @@ export class TodayPage implements OnInit {
   );
 
   protected readonly entries = signal<DiaryRow[]>([]);
-  protected readonly eaten = computed(() =>
-    this.entries().reduce((acc, e) => ({ kcal: acc.kcal + e.kcal, proteinG: acc.proteinG + e.proteinG }), {
-      kcal: 0,
-      proteinG: 0,
-    }),
+  protected readonly eaten = computed(() => this.entries().reduce(addMacros, NO_MACROS));
+  /** Lo apuntado, agrupado por comida y en orden del día, con el total de cada una. */
+  protected readonly eatenBySlot = computed(() =>
+    MEAL_SLOTS.map((slot) => {
+      const items = this.entries().filter((e) => e.slot === slot);
+      return { slot, items, total: items.reduce(addMacros, NO_MACROS) };
+    }).filter((g) => g.items.length > 0),
   );
+  protected readonly searchOpen = signal(false);
   protected readonly eatenPct = computed(() =>
     Math.min(100, Math.round((this.eaten().proteinG / this.proteinTarget()) * 100)),
   );
@@ -126,6 +131,7 @@ export class TodayPage implements OnInit {
       this.date();
       untracked(() => {
         this.form.set(null);
+        this.searchOpen.set(false);
         this.shifts.set({ desayuno: 0, comida: 0, merienda: 0, cena: 0 });
         void this.loadEntries();
       });
@@ -252,7 +258,7 @@ export class TodayPage implements OnInit {
     await this.loadEntries();
   }
 
-  private async loadEntries(): Promise<void> {
+  protected async loadEntries(): Promise<void> {
     try {
       this.entries.set(await this.diary.entriesFor(isoDate(this.date())));
     } catch (e) {

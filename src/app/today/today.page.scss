@@ -231,3 +231,21 @@ select {
   inset: 0;
   z-index: 9;
 }
+
+.add {
+  margin: 4px 0 12px;
+}
+
+.group {
+  margin-top: 8px;
+}
+
+.group-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0 4px;
+}
+
+.row.entry {
+  grid-template-columns: 1fr auto auto;
+}

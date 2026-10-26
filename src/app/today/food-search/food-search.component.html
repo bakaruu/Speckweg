@@ -1,0 +1,128 @@
+<div class="panel">
+  <div class="top">
+    <label>
+      Comida
+      <select (change)="slot.set($any($event.target).value)">
+        @for (s of slots; track s) {
+          <option [value]="s" [selected]="s === slot()">{{ slotLabels()[s] }}</option>
+        }
+      </select>
+    </label>
+    <form class="search" (submit)="$event.preventDefault(); search()">
+      <label>
+        Alimento o código de barras
+        <input
+          #q
+          type="search"
+          placeholder="Ej.: yogur natural, pan de molde, 8480000…"
+          [value]="query()"
+          (input)="query.set(q.value)"
+          autofocus
+        />
+      </label>
+      <button type="submit" [disabled]="searching() || !query().trim()">
+        {{ searching() ? 'Buscando…' : isBarcode() ? 'Buscar código' : 'Buscar' }}
+      </button>
+    </form>
+    <button class="secondary close" (click)="closed.emit()" title="Cerrar">Cerrar</button>
+  </div>
+
+  @if (error(); as e) {
+    <p class="error">{{ e }}</p>
+  }
+
+  @if (selected(); as food) {
+    <div class="amount">
+      <p>
+        <strong>{{ food.name }}</strong>
+        @if (food.brand) {
+          <span class="muted"> · {{ food.brand }}</span>
+        }
+      </p>
+      <div class="quick">
+        @if (food.servingG) {
+          <button
+            class="secondary"
+            [class.selected]="grams() === food.servingG"
+            (click)="grams.set(food.servingG!); g.value = '' + food.servingG"
+          >
+            1 ración ({{ food.servingLabel }})
+          </button>
+        }
+        <button
+          class="secondary"
+          [class.selected]="grams() === 100"
+          (click)="grams.set(100); g.value = '100'"
+        >
+          100 g
+        </button>
+        <label class="grams">
+          Gramos
+          <input
+            #g
+            type="number"
+            min="1"
+            inputmode="numeric"
+            [value]="grams()"
+            (input)="typeGrams(g.value)"
+          />
+        </label>
+      </div>
+      @if (preview(); as p) {
+        <p>
+          <strong>{{ p.kcal }} kcal</strong> · {{ p.proteinG }} g proteína · {{ p.carbsG }} g
+          hidratos · {{ p.fatG }} g grasa
+        </p>
+      }
+      <div class="actions">
+        <button (click)="save()" [disabled]="saving() || !preview()">
+          Apuntar en {{ slotLabels()[slot()] }}
+        </button>
+        <button class="secondary" (click)="selected.set(null)">Elegir otro</button>
+      </div>
+    </div>
+  } @else {
+    @if (results(); as list) {
+      @if (list.length === 0) {
+        <p class="muted">
+          No se ha encontrado nada con calorías. Prueba con otras palabras o con el código de
+          barras.
+        </p>
+      } @else {
+        <ul class="foods">
+          @for (food of list; track food.code) {
+            <li (click)="choose(food)">
+              <span class="name">
+                {{ food.name }}
+                @if (food.brand) {
+                  <span class="muted"> · {{ food.brand }}</span>
+                }
+              </span>
+              <span class="muted per100"
+                >{{ food.kcal100 }} kcal · {{ food.protein100 }} g prot. / 100 g</span
+              >
+            </li>
+          }
+        </ul>
+      }
+    } @else if (recent().length > 0) {
+      <p class="muted small">Recientes</p>
+      <ul class="foods">
+        @for (food of recent(); track food.code) {
+          <li (click)="choose(food)">
+            <span class="name">
+              {{ food.name }}
+              @if (food.brand) {
+                <span class="muted"> · {{ food.brand }}</span>
+              }
+            </span>
+            <span class="muted per100"
+              >{{ food.kcal100 }} kcal · {{ food.protein100 }} g prot. / 100 g</span
+            >
+          </li>
+        }
+      </ul>
+    }
+    <p class="muted small">Datos de Open Food Facts. Los valores son por 100 g del producto.</p>
+  }
+</div>
