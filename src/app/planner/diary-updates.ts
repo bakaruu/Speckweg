@@ -1,4 +1,4 @@
-import { LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
+import { BANANA_SHAKE_ID, CHOCOLATE_PALMIER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -42,6 +42,15 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
     items: [
       { mealId: MEAT_SANDWICH_ID, grams: 170 },
       { mealId: STEW_ID, grams: 377 },
+    ],
+  },
+  {
+    // Batido de soja con 1,5 cacitos y un plátano: 572 g en la báscula menos los 153 g del vaso de la batidora. Y una palmera.
+    id: '2026-10-30-batido-palmera',
+    date: '2026-10-30',
+    items: [
+      { mealId: BANANA_SHAKE_ID, grams: 419 },
+      { mealId: CHOCOLATE_PALMIER_ID, grams: 90 },
     ],
   },
 ];

@@ -1,6 +1,6 @@
 import { DEFAULT_DISHES, DEFAULT_INGREDIENTS } from './default-menu';
 import { dishTotals, Menu } from './menu-model';
-import { applyMenuUpdates, LENTILS_UPDATE, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, PROTEIN_SCOOP_UPDATE, SOY_MILK_UPDATE, STEW_TOAST_SANDWICH_UPDATE, WINGS_UPDATE } from './menu-updates';
+import { applyMenuUpdates, BANANA_SHAKE_PALMIER_UPDATE, LENTILS_UPDATE, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, PROTEIN_SCOOP_UPDATE, SOY_MILK_UPDATE, STEW_TOAST_SANDWICH_UPDATE, WINGS_UPDATE } from './menu-updates';
 import { toMealIdea } from './menu-model';
 
 describe('applyMenuUpdates', () => {
@@ -44,7 +44,7 @@ describe('applyMenuUpdates', () => {
   it('después pone la proteína con su etiqueta y el cacito a 27 g (pesado)', () => {
     const { menu, applied, changed } = applyMenuUpdates(saved, []);
     expect(changed).toBe(true);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id, BANANA_SHAKE_PALMIER_UPDATE.id]);
     const protein = menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')!;
     expect(protein).toEqual({ id: 'proteina-soja-hsn', name: 'Proteína de soja', kcal100: 389, protein100: 92, measure: { name: 'cacito', grams: 27 } });
     expect(menu.ingredients.find((i) => i.id === 'avena')?.measure?.grams).toBe(20);
@@ -55,7 +55,7 @@ describe('applyMenuUpdates', () => {
 
   it('solo aplica lo que falta', () => {
     const { menu, applied } = applyMenuUpdates(SOY_MILK_UPDATE.apply(saved), [SOY_MILK_UPDATE.id]);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id, BANANA_SHAKE_PALMIER_UPDATE.id]);
     expect(menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')?.measure?.grams).toBe(27);
   });
 
@@ -103,5 +103,19 @@ describe('applyMenuUpdates', () => {
     expect(meal('tostadas-crema-cacahuete')).toEqual(expect.objectContaining({ slot: 'desayuno', portionG: 100, kcal: 326, proteinG: 12 }));
     expect(meal('medio-bocata-carne-salsa')).toEqual(expect.objectContaining({ portionG: 170, kcal: 343, proteinG: 19 }));
     expect(STEW_TOAST_SANDWICH_UPDATE.apply(menu)).toEqual(menu);
+  });
+
+  it('pone el batido con plátano de Aru y añade la palmera de chocolate', () => {
+    const old: Menu = {
+      ingredients: structuredClone(DEFAULT_INGREDIENTS.filter((i) => i.id !== 'palmera-chocolate')),
+      dishes: [{ id: 'batido-soja-platano', slot: 'merienda', name: 'Batido de proteína de soja con plátano', portion: '1 vaso grande', lines: [{ ingredientId: 'proteina-soja-hsn', amount: 1, unit: 'medida' }] }],
+    };
+    const menu = BANANA_SHAKE_PALMIER_UPDATE.apply(old);
+    const meal = (id: string) => toMealIdea(menu.dishes.find((d) => d.id === id)!, menu.ingredients);
+    // 300 ml de soja (96 kcal, 9,3 g) + 40,5 g de proteína (157,5 kcal, 37,3 g) + 79 g de plátano (70 kcal, 0,9 g)
+    expect(meal('batido-soja-platano')).toEqual(expect.objectContaining({ portionG: 420, kcal: 324, proteinG: 47, usual: true }));
+    expect(meal('palmera-chocolate')).toEqual(expect.objectContaining({ portionG: 90, kcal: 477, proteinG: 5, side: true }));
+    expect(menu.dishes.length).toBe(2);
+    expect(BANANA_SHAKE_PALMIER_UPDATE.apply(menu)).toEqual(menu);
   });
 });

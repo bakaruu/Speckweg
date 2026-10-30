@@ -10,6 +10,8 @@ import {
   STEW_ID,
   PEANUT_TOAST_ID,
   MEAT_SANDWICH_ID,
+  BANANA_SHAKE_ID,
+  CHOCOLATE_PALMIER_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -186,6 +188,30 @@ export const STEW_TOAST_SANDWICH_UPDATE: MenuUpdate = {
   },
 };
 
+/**
+ * Octubre 2026: el batido con plátano pasa a ser el de Aru (300 ml de soja, 1,5 cacitos y un plátano pequeño)
+ * y se añade la palmera de chocolate.
+ */
+export const BANANA_SHAKE_PALMIER_UPDATE: MenuUpdate = {
+  id: '2026-10-batido-platano-palmera',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const fromDefaults = <T extends { id: string }>(list: T[], id: string) => structuredClone(list.find((i) => i.id === id)!);
+    for (const id of [SOY_MILK_ID, 'proteina-soja-hsn', 'platano', CHOCOLATE_PALMIER_ID]) {
+      if (!ingredients.some((i) => i.id === id)) {
+        ingredients.push(fromDefaults(DEFAULT_INGREDIENTS, id));
+      }
+    }
+    const dishes = menu.dishes.filter((d) => d.id !== BANANA_SHAKE_ID).map((d) => structuredClone(d));
+    const at = menu.dishes.findIndex((d) => d.id === BANANA_SHAKE_ID);
+    dishes.splice(at < 0 ? dishes.length : at, 0, fromDefaults(DEFAULT_DISHES, BANANA_SHAKE_ID));
+    if (!dishes.some((d) => d.id === CHOCOLATE_PALMIER_ID)) {
+      dishes.push(fromDefaults(DEFAULT_DISHES, CHOCOLATE_PALMIER_ID));
+    }
+    return { ingredients, dishes };
+  },
+};
+
 export const MENU_UPDATES: MenuUpdate[] = [
   SOY_MILK_UPDATE,
   PROTEIN_ISOLATE_UPDATE,
@@ -193,6 +219,7 @@ export const MENU_UPDATES: MenuUpdate[] = [
   PROTEIN_SCOOP_UPDATE,
   WINGS_UPDATE,
   STEW_TOAST_SANDWICH_UPDATE,
+  BANANA_SHAKE_PALMIER_UPDATE,
 ];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */

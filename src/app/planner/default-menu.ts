@@ -9,6 +9,8 @@ export const WINGS_ID = 'alitas-pollo';
 export const STEW_ID = 'estofado';
 export const PEANUT_TOAST_ID = 'tostadas-crema-cacahuete';
 export const MEAT_SANDWICH_ID = 'medio-bocata-carne-salsa';
+export const BANANA_SHAKE_ID = 'batido-soja-platano';
+export const CHOCOLATE_PALMIER_ID = 'palmera-chocolate';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -61,6 +63,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   { id: 'crema-cacahuete', name: 'Crema de cacahuete', kcal100: 590, protein100: 25, measure: { name: 'cucharadita', grams: 10 } },
   // Carne guisada en salsa (ternera o cerdo), ya hecha.
   { id: 'carne-salsa', name: 'Carne en salsa', kcal100: 150, protein100: 13, measure: { name: 'ración', grams: 90 } },
+  // Palmera de chocolate de bollería, de las normales: unas 530 kcal y 6 g de proteína por 100 g, y unos 90 g la pieza.
+  { id: CHOCOLATE_PALMIER_ID, name: 'Palmera de chocolate', kcal100: 530, protein100: 6, measure: { name: 'unidad', grams: 90 } },
 ];
 
 const m = (ingredientId: string, amount = 1): DishLine => ({ ingredientId, amount, unit: 'medida' });
@@ -93,7 +97,9 @@ export const DEFAULT_DISHES: Dish[] = [
 
   // Meriendas
   { id: POST_WORKOUT_SHAKE_ID, slot: 'merienda', name: 'Batido post-entreno', portion: '1 vaso grande', usual: true, lines: [g(SOY_MILK_ID, 300), m('proteina-soja-hsn', 1.5), m('avena', 1.5)] },
-  { id: 'batido-soja-platano', slot: 'merienda', name: 'Batido de proteína de soja con plátano', portion: '1 vaso grande', lines: [m('proteina-soja-hsn'), m('platano'), g(SOY_MILK_ID, 300)] },
+  // El de Aru: 572 g en la báscula menos los 153 g del vaso de la batidora son 419 g, así que el plátano pelado eran unos 79 g.
+  { id: BANANA_SHAKE_ID, slot: 'merienda', name: 'Batido de proteína de soja con plátano', portion: '1 vaso de batidora (419 g)', usual: true, lines: [g(SOY_MILK_ID, 300), m('proteina-soja-hsn', 1.5), g('platano', 79)] },
+  { id: CHOCOLATE_PALMIER_ID, slot: 'merienda', name: 'Palmera de chocolate', portion: '1 palmera', side: true, lines: [m(CHOCOLATE_PALMIER_ID)] },
   { id: 'yogur-frutos-secos', slot: 'merienda', name: 'Yogur con un puñado de frutos secos', portion: '1 yogur + 1 puñado', lines: [m('yogur'), m('frutos-secos')] },
   { id: 'bocadillo-pavo', slot: 'merienda', name: 'Bocadillo pequeño de pavo y queso', portion: '1 bocadillo pequeño', lines: [m('pan', 2), m('pavo', 3), m('queso')] },
   { id: 'tostada-tomate-atun', slot: 'merienda', name: 'Tostada con tomate y atún', portion: '1 tostada', lines: [m('pan'), m('tomate', 2), m('atun')] },
