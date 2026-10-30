@@ -18,7 +18,7 @@ describe('daily-plan', () => {
   it('recorre todas las opciones al pedir otra sugerencia', () => {
     const options = optionsFor('cena');
     const seen = new Set(options.map((_, i) => pickMeal(day, 'cena', i)!.id));
-    expect(seen.size).toBe(options.length);
+    expect(seen.size).toBe(options.filter((m) => !m.side).length);
   });
 
   it('no sugiere acompañamientos como comida, aunque se puedan apuntar', () => {

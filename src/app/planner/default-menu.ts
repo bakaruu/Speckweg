@@ -11,6 +11,7 @@ export const PEANUT_TOAST_ID = 'tostadas-crema-cacahuete';
 export const MEAT_SANDWICH_ID = 'medio-bocata-carne-salsa';
 export const BANANA_SHAKE_ID = 'batido-soja-platano';
 export const CHOCOLATE_PALMIER_ID = 'palmera-chocolate';
+export const KRISPPER_ID = 'chicken-krispper-bk';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -64,6 +65,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   // Carne guisada en salsa (ternera o cerdo), ya hecha.
   { id: 'carne-salsa', name: 'Carne en salsa', kcal100: 150, protein100: 13, measure: { name: 'ración', grams: 90 } },
   // Palmera de chocolate de bollería, de las normales: unas 530 kcal y 6 g de proteína por 100 g, y unos 90 g la pieza.
+  // Chicken Krispper de Burger King, la normal de 1 carne: 304 g y unas 800 kcal; la proteína, estimada (unos 32 g).
+  { id: KRISPPER_ID, name: 'Chicken Krispper (Burger King)', kcal100: 263.2, protein100: 10.5, measure: { name: 'hamburguesa', grams: 304 } },
   { id: CHOCOLATE_PALMIER_ID, name: 'Palmera de chocolate', kcal100: 530, protein100: 6, measure: { name: 'unidad', grams: 90 } },
 ];
 
@@ -106,6 +109,7 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: 'fruta-batido-soja', slot: 'merienda', name: 'Pieza de fruta y batido de soja con agua', portion: '1 fruta + 1 vaso', lines: [m('fruta'), m('proteina-soja-hsn')] },
 
   // Cenas
+  { id: KRISPPER_ID, slot: 'cena', name: 'Chicken Krispper de Burger King', portion: '1 hamburguesa (304 g)', side: true, lines: [m(KRISPPER_ID)] },
   { id: 'jamon-atun', slot: 'cena', name: 'Jamón y atún', portion: '1 plato', usual: true, lines: [m('jamon', 4), m('atun'), m('pan')] },
   { id: 'tortilla-francesa', slot: 'cena', name: 'Tortilla francesa', portion: '1 tortilla de 2 huevos', usual: true, lines: [m('huevo', 2), g('aceite', 5), m('pan')] },
   { id: 'huevos-duros', slot: 'cena', name: 'Huevos duros', portion: '3 huevos', usual: true, lines: [m('huevo', 3), g('aceite', 5)] },
