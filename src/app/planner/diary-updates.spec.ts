@@ -63,6 +63,12 @@ describe('pendingDiaryUpdates', () => {
     expect(macrosFor(day.items[1].meal, 163)).toEqual({ kcal: 55, proteinG: 5 });
   });
 
+  it('el 30 de octubre vuelve a poner el batido con plátano y quita el post-entreno', () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-10-30-corrige-batidos')!;
+    expect(day.items.map((i) => [i.meal.name, i.grams])).toEqual([['Batido de proteína de soja con plátano', 419]]);
+    expect(day.remove).toEqual([{ name: 'Batido post-entreno', grams: 371 }]);
+  });
+
   it('no repite lo ya apuntado', () => {
     expect(pendingDiaryUpdates(DIARY_UPDATES.map((u) => u.id), MEAL_CATALOG)).toEqual([]);
   });
