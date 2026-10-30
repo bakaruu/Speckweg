@@ -74,6 +74,13 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
       { mealId: BREADSTICKS_ID, grams: 34 },
     ],
   },
+  {
+    // Corrección: el batido con plátano sí se lo tomó; el que no se tomó es el batido post-entreno de la merienda.
+    id: '2026-10-30-corrige-batidos',
+    date: '2026-10-30',
+    items: [{ mealId: BANANA_SHAKE_ID, grams: 419 }],
+    remove: [{ name: 'Batido post-entreno', grams: 371 }],
+  },
 ];
 
 /** Lo que falta por apuntar: cada comida con su plato del menú y sus gramos. */
