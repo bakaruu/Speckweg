@@ -1,4 +1,4 @@
-import { BANANA_SHAKE_ID, BROCCOLI_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
+import { BANANA_SHAKE_ID, BREADSTICKS_ID, BROCCOLI_ID, HAM_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -69,6 +69,9 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
     items: [
       { mealId: KRISPPER_ID, grams: 304 },
       { mealId: BROCCOLI_ID, grams: 163 },
+      // 212 g menos los 176 g del plato de postre, y 233 g menos los 199 g del bol de cristal.
+      { mealId: HAM_ID, grams: 36 },
+      { mealId: BREADSTICKS_ID, grams: 34 },
     ],
   },
 ];

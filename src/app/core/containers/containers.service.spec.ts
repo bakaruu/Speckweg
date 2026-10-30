@@ -12,6 +12,8 @@ describe('addDefaultContainers', () => {
       ['Plato pequeño con dibujo marrón', 277],
       ['Plato transparente marrón plano', 460],
       ['Vaso de la batidora', 153],
+      ['Plato de postre con dibujo marrón en el centro', 176],
+      ['Bol de cristal con asa', 199],
     ]);
     // Si luego borras la taza, no vuelve.
     const again = addDefaultContainers(first.list.filter((c) => c.id !== 'taza'), first.added);
@@ -24,7 +26,7 @@ describe('addDefaultContainers', () => {
       { id: 'taza', name: 'Taza', grams: 179 },
     ];
     const { list } = addDefaultContainers(before, ['plato-transparente-marron', 'taza']);
-    expect(list.length).toBe(7);
+    expect(list.length).toBe(9);
     expect(list[0].name).toBe('Plato transparente marrón hondo');
     expect(list.find((c) => c.id === 'vaso-batidora')?.grams).toBe(153);
   });

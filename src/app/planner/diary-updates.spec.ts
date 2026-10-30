@@ -49,12 +49,16 @@ describe('pendingDiaryUpdates', () => {
     expect(day.remove).toEqual([{ name: 'Batido de proteína de soja con plátano', grams: 419 }]);
   });
 
-  it('apunta la Chicken Krispper y el brócoli de la cena del 30 de octubre', () => {
+  it('apunta la cena del 30 de octubre: Krispper, brócoli, jamón y palitos', () => {
     const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-10-30-cena-krispper')!;
     expect(day.items.map((i) => [i.meal.name, i.meal.slot, i.grams])).toEqual([
       ['Chicken Krispper de Burger King', 'cena', 304],
       ['Brócoli al horno o airfryer', 'cena', 163],
+      ['Jamón serrano', 'cena', 36],
+      ['Palitos de pan integrales', 'cena', 34],
     ]);
+    const kcal = day.items.reduce((sum, i) => sum + macrosFor(i.meal, i.grams).kcal, 0);
+    expect(kcal).toBe(800 + 55 + 86 + 136);
     expect(macrosFor(day.items[0].meal, 304)).toEqual({ kcal: 800, proteinG: 32 });
     expect(macrosFor(day.items[1].meal, 163)).toEqual({ kcal: 55, proteinG: 5 });
   });

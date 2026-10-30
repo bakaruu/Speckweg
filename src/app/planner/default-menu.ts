@@ -13,6 +13,8 @@ export const BANANA_SHAKE_ID = 'batido-soja-platano';
 export const CHOCOLATE_PALMIER_ID = 'palmera-chocolate';
 export const KRISPPER_ID = 'chicken-krispper-bk';
 export const BROCCOLI_ID = 'brocoli-solo';
+export const HAM_ID = 'jamon-solo';
+export const BREADSTICKS_ID = 'palitos-pan-integral';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -68,6 +70,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   // Palmera de chocolate de bollería, de las normales: unas 530 kcal y 6 g de proteína por 100 g, y unos 90 g la pieza.
   // Chicken Krispper de Burger King, la normal de 1 carne: 304 g y unas 800 kcal; la proteína, estimada (unos 32 g).
   { id: KRISPPER_ID, name: 'Chicken Krispper (Burger King)', kcal100: 263.2, protein100: 10.5, measure: { name: 'hamburguesa', grams: 304 } },
+  // Palitos de pan integrales tipo picos o grissini, valores típicos: unas 400 kcal y 12 g de proteína por 100 g.
+  { id: BREADSTICKS_ID, name: 'Palitos de pan integrales', kcal100: 400, protein100: 12, measure: { name: 'puñado', grams: 34 } },
   { id: CHOCOLATE_PALMIER_ID, name: 'Palmera de chocolate', kcal100: 530, protein100: 6, measure: { name: 'unidad', grams: 90 } },
 ];
 
@@ -112,6 +116,8 @@ export const DEFAULT_DISHES: Dish[] = [
   // Cenas
   { id: KRISPPER_ID, slot: 'cena', name: 'Chicken Krispper de Burger King', portion: '1 hamburguesa (304 g)', side: true, lines: [m(KRISPPER_ID)] },
   { id: BROCCOLI_ID, slot: 'cena', name: 'Brócoli al horno o airfryer', portion: '1 plato (163 g)', side: true, lines: [g('brocoli', 163)] },
+  { id: HAM_ID, slot: 'cena', name: 'Jamón serrano', portion: '1 plato pequeño (36 g)', side: true, lines: [g('jamon', 36)] },
+  { id: BREADSTICKS_ID, slot: 'cena', name: 'Palitos de pan integrales', portion: '1 bol (34 g)', side: true, lines: [m(BREADSTICKS_ID)] },
   { id: 'jamon-atun', slot: 'cena', name: 'Jamón y atún', portion: '1 plato', usual: true, lines: [m('jamon', 4), m('atun'), m('pan')] },
   { id: 'tortilla-francesa', slot: 'cena', name: 'Tortilla francesa', portion: '1 tortilla de 2 huevos', usual: true, lines: [m('huevo', 2), g('aceite', 5), m('pan')] },
   { id: 'huevos-duros', slot: 'cena', name: 'Huevos duros', portion: '3 huevos', usual: true, lines: [m('huevo', 3), g('aceite', 5)] },
