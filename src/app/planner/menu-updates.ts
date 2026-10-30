@@ -13,6 +13,7 @@ import {
   BANANA_SHAKE_ID,
   CHOCOLATE_PALMIER_ID,
   KRISPPER_ID,
+  BROCCOLI_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -213,17 +214,21 @@ export const BANANA_SHAKE_PALMIER_UPDATE: MenuUpdate = {
   },
 };
 
-/** Octubre 2026: se añade la Chicken Krispper de Burger King. */
+/** Octubre 2026: se añaden la Chicken Krispper de Burger King y el brócoli solo. */
 export const KRISPPER_UPDATE: MenuUpdate = {
   id: '2026-10-chicken-krispper',
   apply(menu: Menu): Menu {
     const ingredients = structuredClone(menu.ingredients);
     const dishes = structuredClone(menu.dishes);
-    if (!ingredients.some((i) => i.id === KRISPPER_ID)) {
-      ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === KRISPPER_ID)!));
+    for (const id of [KRISPPER_ID, 'brocoli']) {
+      if (!ingredients.some((i) => i.id === id)) {
+        ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === id)!));
+      }
     }
-    if (!dishes.some((d) => d.id === KRISPPER_ID)) {
-      dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === KRISPPER_ID)!));
+    for (const id of [KRISPPER_ID, BROCCOLI_ID]) {
+      if (!dishes.some((d) => d.id === id)) {
+        dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === id)!));
+      }
     }
     return { ingredients, dishes };
   },

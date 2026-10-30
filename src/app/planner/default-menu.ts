@@ -12,6 +12,7 @@ export const MEAT_SANDWICH_ID = 'medio-bocata-carne-salsa';
 export const BANANA_SHAKE_ID = 'batido-soja-platano';
 export const CHOCOLATE_PALMIER_ID = 'palmera-chocolate';
 export const KRISPPER_ID = 'chicken-krispper-bk';
+export const BROCCOLI_ID = 'brocoli-solo';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -110,6 +111,7 @@ export const DEFAULT_DISHES: Dish[] = [
 
   // Cenas
   { id: KRISPPER_ID, slot: 'cena', name: 'Chicken Krispper de Burger King', portion: '1 hamburguesa (304 g)', side: true, lines: [m(KRISPPER_ID)] },
+  { id: BROCCOLI_ID, slot: 'cena', name: 'Brócoli al horno o airfryer', portion: '1 plato (163 g)', side: true, lines: [g('brocoli', 163)] },
   { id: 'jamon-atun', slot: 'cena', name: 'Jamón y atún', portion: '1 plato', usual: true, lines: [m('jamon', 4), m('atun'), m('pan')] },
   { id: 'tortilla-francesa', slot: 'cena', name: 'Tortilla francesa', portion: '1 tortilla de 2 huevos', usual: true, lines: [m('huevo', 2), g('aceite', 5), m('pan')] },
   { id: 'huevos-duros', slot: 'cena', name: 'Huevos duros', portion: '3 huevos', usual: true, lines: [m('huevo', 3), g('aceite', 5)] },

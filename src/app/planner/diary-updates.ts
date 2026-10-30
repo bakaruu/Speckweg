@@ -1,4 +1,4 @@
-import { BANANA_SHAKE_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
+import { BANANA_SHAKE_ID, BROCCOLI_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -63,10 +63,13 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
     remove: [{ name: 'Batido de proteína de soja con plátano', grams: 419 }],
   },
   {
-    // Cena: la Chicken Krispper de Burger King entera.
+    // Cena: la Chicken Krispper de Burger King entera y el brócoli (598 g menos los 435 g del plato grande con dibujo marrón).
     id: '2026-10-30-cena-krispper',
     date: '2026-10-30',
-    items: [{ mealId: KRISPPER_ID, grams: 304 }],
+    items: [
+      { mealId: KRISPPER_ID, grams: 304 },
+      { mealId: BROCCOLI_ID, grams: 163 },
+    ],
   },
 ];
 

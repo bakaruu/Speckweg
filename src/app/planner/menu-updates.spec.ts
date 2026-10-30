@@ -119,10 +119,12 @@ describe('applyMenuUpdates', () => {
     expect(BANANA_SHAKE_PALMIER_UPDATE.apply(menu)).toEqual(menu);
   });
 
-  it('añade la Chicken Krispper de Burger King', () => {
+  it('añade la Chicken Krispper de Burger King y el brócoli solo', () => {
     const menu = KRISPPER_UPDATE.apply({ ingredients: [], dishes: [] });
-    const krispper = toMealIdea(menu.dishes[0], menu.ingredients);
+    const [krispper, broccoli] = menu.dishes.map((d) => toMealIdea(d, menu.ingredients));
     expect(krispper).toEqual(expect.objectContaining({ slot: 'cena', portionG: 304, kcal: 800, proteinG: 32, side: true }));
+    // 163 g a 34 kcal y 2,8 g de proteína por 100 g.
+    expect(broccoli).toEqual(expect.objectContaining({ slot: 'cena', portionG: 163, kcal: 55, proteinG: 5, side: true }));
     expect(KRISPPER_UPDATE.apply(menu)).toEqual(menu);
   });
 });
