@@ -34,13 +34,33 @@ describe('pendingDiaryUpdates', () => {
   });
 
   it('apunta el batido con plátano y la palmera del 30 de octubre', () => {
-    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.date === '2026-10-30')!;
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-10-30-batido-palmera')!;
     expect(day.items.map((i) => [i.meal.name, i.grams])).toEqual([
       ['Batido de proteína de soja con plátano', 419],
       ['Palmera de chocolate', 90],
     ]);
     const kcal = day.items.reduce((sum, i) => sum + macrosFor(i.meal, i.grams).kcal, 0);
     expect(kcal).toBe(323 + 477);
+  });
+
+  it('quita el batido del 30 de octubre, que al final no se tomó', () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-10-30-quitar-batido')!;
+    expect(day.items).toEqual([]);
+    expect(day.remove).toEqual([{ name: 'Batido de proteína de soja con plátano', grams: 419 }]);
+  });
+
+  it('apunta la cena del 30 de octubre: Krispper, brócoli, jamón y palitos', () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-10-30-cena-krispper')!;
+    expect(day.items.map((i) => [i.meal.name, i.meal.slot, i.grams])).toEqual([
+      ['Chicken Krispper de Burger King', 'cena', 304],
+      ['Brócoli al horno o airfryer', 'cena', 163],
+      ['Jamón serrano', 'cena', 36],
+      ['Palitos de pan integrales', 'cena', 34],
+    ]);
+    const kcal = day.items.reduce((sum, i) => sum + macrosFor(i.meal, i.grams).kcal, 0);
+    expect(kcal).toBe(800 + 55 + 86 + 136);
+    expect(macrosFor(day.items[0].meal, 304)).toEqual({ kcal: 800, proteinG: 32 });
+    expect(macrosFor(day.items[1].meal, 163)).toEqual({ kcal: 55, proteinG: 5 });
   });
 
   it('no repite lo ya apuntado', () => {

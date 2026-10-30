@@ -138,7 +138,7 @@ export class TodayPage implements OnInit {
     this.weightKg.set(await this.settings.getWeightKg());
   }
 
-  /** Apunta, una sola vez, las comidas que nos pasaste por el chat. */
+  /** Apunta (o quita), una sola vez, las comidas que nos pasaste por el chat. */
   private async applyDiaryUpdates(): Promise<void> {
     try {
       const applied = await this.settings.getDiaryUpdates();
@@ -146,6 +146,12 @@ export class TodayPage implements OnInit {
       for (const update of pending) {
         for (const { meal, grams } of update.items) {
           await this.diary.logMeal(update.date, meal, grams);
+        }
+        for (const { name, grams } of update.remove) {
+          const entry = (await this.diary.entriesFor(update.date)).find((e) => e.name === name && e.grams === grams);
+          if (entry) {
+            await this.diary.remove(entry.id);
+          }
         }
         applied.push(update.id);
         await this.settings.setDiaryUpdates(applied);

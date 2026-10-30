@@ -19,6 +19,8 @@ export const DEFAULT_CONTAINERS: FoodContainer[] = [
   { id: 'plato-pequeno-dibujo-marron', name: 'Plato pequeño con dibujo marrón', grams: 277 },
   { id: 'plato-transparente-marron-plano', name: 'Plato transparente marrón plano', grams: 460 },
   { id: 'vaso-batidora', name: 'Vaso de la batidora', grams: 153 },
+  { id: 'plato-postre-dibujo-marron', name: 'Plato de postre con dibujo marrón en el centro', grams: 176 },
+  { id: 'bol-cristal-asa', name: 'Bol de cristal con asa', grams: 199 },
 ];
 
 /** Añade los recipientes iniciales que falten y que no se hayan añadido antes. */

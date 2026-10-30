@@ -1,4 +1,4 @@
-import { BANANA_SHAKE_ID, CHOCOLATE_PALMIER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
+import { BANANA_SHAKE_ID, BREADSTICKS_ID, BROCCOLI_ID, HAM_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -10,6 +10,8 @@ export interface DiaryUpdate {
   /** Día, YYYY-MM-DD. */
   date: string;
   items: { mealId: string; grams: number }[];
+  /** Lo que hay que quitar de ese día, por nombre y gramos (una entrada por cada uno). */
+  remove?: { name: string; grams: number }[];
 }
 
 export const DIARY_UPDATES: DiaryUpdate[] = [
@@ -53,13 +55,37 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
       { mealId: CHOCOLATE_PALMIER_ID, grams: 90 },
     ],
   },
+  {
+    // Al final el batido de la tarde no se lo tomó: se quita y la palmera se queda.
+    id: '2026-10-30-quitar-batido',
+    date: '2026-10-30',
+    items: [],
+    remove: [{ name: 'Batido de proteína de soja con plátano', grams: 419 }],
+  },
+  {
+    // Cena: la Chicken Krispper de Burger King entera y el brócoli (598 g menos los 435 g del plato grande con dibujo marrón).
+    id: '2026-10-30-cena-krispper',
+    date: '2026-10-30',
+    items: [
+      { mealId: KRISPPER_ID, grams: 304 },
+      { mealId: BROCCOLI_ID, grams: 163 },
+      // 212 g menos los 176 g del plato de postre, y 233 g menos los 199 g del bol de cristal.
+      { mealId: HAM_ID, grams: 36 },
+      { mealId: BREADSTICKS_ID, grams: 34 },
+    ],
+  },
 ];
 
 /** Lo que falta por apuntar: cada comida con su plato del menú y sus gramos. */
 export function pendingDiaryUpdates(
   applied: string[],
   meals: MealIdea[],
-): { id: string; date: string; items: { meal: MealIdea; grams: number }[] }[] {
+): {
+  id: string;
+  date: string;
+  items: { meal: MealIdea; grams: number }[];
+  remove: { name: string; grams: number }[];
+}[] {
   return DIARY_UPDATES.filter((u) => !applied.includes(u.id)).map((u) => ({
     id: u.id,
     date: u.date,
@@ -67,5 +93,6 @@ export function pendingDiaryUpdates(
       const meal = meals.find((m) => m.id === mealId);
       return meal ? [{ meal, grams }] : [];
     }),
+    remove: u.remove ?? [],
   }));
 }

@@ -12,6 +12,10 @@ import {
   MEAT_SANDWICH_ID,
   BANANA_SHAKE_ID,
   CHOCOLATE_PALMIER_ID,
+  KRISPPER_ID,
+  BROCCOLI_ID,
+  HAM_ID,
+  BREADSTICKS_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -212,6 +216,26 @@ export const BANANA_SHAKE_PALMIER_UPDATE: MenuUpdate = {
   },
 };
 
+/** Octubre 2026: se añaden la Chicken Krispper de Burger King, el brócoli solo, el jamón solo y los palitos de pan. */
+export const KRISPPER_UPDATE: MenuUpdate = {
+  id: '2026-10-chicken-krispper',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    for (const id of [KRISPPER_ID, 'brocoli', 'jamon', BREADSTICKS_ID]) {
+      if (!ingredients.some((i) => i.id === id)) {
+        ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === id)!));
+      }
+    }
+    for (const id of [KRISPPER_ID, BROCCOLI_ID, HAM_ID, BREADSTICKS_ID]) {
+      if (!dishes.some((d) => d.id === id)) {
+        dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === id)!));
+      }
+    }
+    return { ingredients, dishes };
+  },
+};
+
 export const MENU_UPDATES: MenuUpdate[] = [
   SOY_MILK_UPDATE,
   PROTEIN_ISOLATE_UPDATE,
@@ -220,6 +244,7 @@ export const MENU_UPDATES: MenuUpdate[] = [
   WINGS_UPDATE,
   STEW_TOAST_SANDWICH_UPDATE,
   BANANA_SHAKE_PALMIER_UPDATE,
+  KRISPPER_UPDATE,
 ];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
