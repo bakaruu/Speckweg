@@ -34,13 +34,19 @@ describe('pendingDiaryUpdates', () => {
   });
 
   it('apunta el batido con plátano y la palmera del 30 de octubre', () => {
-    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.date === '2026-10-30')!;
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-10-30-batido-palmera')!;
     expect(day.items.map((i) => [i.meal.name, i.grams])).toEqual([
       ['Batido de proteína de soja con plátano', 419],
       ['Palmera de chocolate', 90],
     ]);
     const kcal = day.items.reduce((sum, i) => sum + macrosFor(i.meal, i.grams).kcal, 0);
     expect(kcal).toBe(323 + 477);
+  });
+
+  it('quita el batido del 30 de octubre, que al final no se tomó', () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-10-30-quitar-batido')!;
+    expect(day.items).toEqual([]);
+    expect(day.remove).toEqual([{ name: 'Batido de proteína de soja con plátano', grams: 419 }]);
   });
 
   it('no repite lo ya apuntado', () => {
