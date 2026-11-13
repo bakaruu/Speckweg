@@ -69,6 +69,12 @@ describe('pendingDiaryUpdates', () => {
     expect(day.remove).toEqual([{ name: 'Batido post-entreno', grams: 371 }]);
   });
 
+  it('apunta la merluza con papas del 13 de noviembre', () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-11-13-comida')!;
+    expect(day.items.map((i) => [i.meal.name, i.meal.slot, i.grams])).toEqual([['Merluza con papas', 'comida', 379]]);
+    expect(macrosFor(day.items[0].meal, 379)).toEqual({ kcal: 284, proteinG: 27 });
+  });
+
   it('no repite lo ya apuntado', () => {
     expect(pendingDiaryUpdates(DIARY_UPDATES.map((u) => u.id), MEAL_CATALOG)).toEqual([]);
   });

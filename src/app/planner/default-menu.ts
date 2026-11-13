@@ -15,6 +15,7 @@ export const KRISPPER_ID = 'chicken-krispper-bk';
 export const BROCCOLI_ID = 'brocoli-solo';
 export const HAM_ID = 'jamon-solo';
 export const BREADSTICKS_ID = 'palitos-pan-integral';
+export const HAKE_ID = 'merluza-con-papas';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -73,6 +74,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   // Palitos de pan integrales tipo picos o grissini, valores típicos: unas 400 kcal y 12 g de proteína por 100 g.
   { id: BREADSTICKS_ID, name: 'Palitos de pan integrales', kcal100: 400, protein100: 12, measure: { name: 'puñado', grams: 34 } },
   { id: CHOCOLATE_PALMIER_ID, name: 'Palmera de chocolate', kcal100: 530, protein100: 6, measure: { name: 'unidad', grams: 90 } },
+  // Merluza guisada con patata y guisantes, caldosa: unas 75 kcal y 7 g de proteína por 100 g.
+  { id: HAKE_ID, name: 'Merluza con papas', kcal100: 75, protein100: 7, measure: { name: 'plato', grams: 379 } },
 ];
 
 const m = (ingredientId: string, amount = 1): DishLine => ({ ingredientId, amount, unit: 'medida' });
@@ -114,6 +117,7 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: 'fruta-batido-soja', slot: 'merienda', name: 'Pieza de fruta y batido de soja con agua', portion: '1 fruta + 1 vaso', lines: [m('fruta'), m('proteina-soja-hsn')] },
 
   // Cenas
+  { id: HAKE_ID, slot: 'comida', name: 'Merluza con papas', portion: '1 plato (379 g)', notes: 'Merluza guisada con patata y guisantes, caldosa', usual: true, lines: [m(HAKE_ID)] },
   { id: KRISPPER_ID, slot: 'cena', name: 'Chicken Krispper de Burger King', portion: '1 hamburguesa (304 g)', side: true, lines: [m(KRISPPER_ID)] },
   { id: BROCCOLI_ID, slot: 'cena', name: 'Brócoli al horno o airfryer', portion: '1 plato (163 g)', side: true, lines: [g('brocoli', 163)] },
   { id: HAM_ID, slot: 'cena', name: 'Jamón serrano', portion: '1 plato pequeño (36 g)', side: true, lines: [g('jamon', 36)] },

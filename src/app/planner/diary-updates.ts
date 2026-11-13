@@ -1,4 +1,4 @@
-import { BANANA_SHAKE_ID, BREADSTICKS_ID, BROCCOLI_ID, HAM_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
+import { BANANA_SHAKE_ID, BREADSTICKS_ID, HAKE_ID, BROCCOLI_ID, HAM_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -80,6 +80,12 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
     date: '2026-10-30',
     items: [{ mealId: BANANA_SHAKE_ID, grams: 419 }],
     remove: [{ name: 'Batido post-entreno', grams: 371 }],
+  },
+  {
+    // Merluza con papas: 742 g en la báscula menos los 363 g del plato blanco ondulado.
+    id: '2026-11-13-comida',
+    date: '2026-11-13',
+    items: [{ mealId: HAKE_ID, grams: 379 }],
   },
 ];
 
