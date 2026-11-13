@@ -1,6 +1,6 @@
 import { DEFAULT_DISHES, DEFAULT_INGREDIENTS } from './default-menu';
 import { dishTotals, Menu } from './menu-model';
-import { applyMenuUpdates, BANANA_SHAKE_PALMIER_UPDATE, KRISPPER_UPDATE, LENTILS_UPDATE, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, PROTEIN_SCOOP_UPDATE, SOY_MILK_UPDATE, STEW_TOAST_SANDWICH_UPDATE, WINGS_UPDATE } from './menu-updates';
+import { applyMenuUpdates, BANANA_SHAKE_PALMIER_UPDATE, HAKE_UPDATE, KRISPPER_UPDATE, LENTILS_UPDATE, MENU_UPDATES, PROTEIN_ISOLATE_UPDATE, PROTEIN_SCOOP_UPDATE, SOY_MILK_UPDATE, STEW_TOAST_SANDWICH_UPDATE, WINGS_UPDATE } from './menu-updates';
 import { toMealIdea } from './menu-model';
 
 describe('applyMenuUpdates', () => {
@@ -44,7 +44,7 @@ describe('applyMenuUpdates', () => {
   it('después pone la proteína con su etiqueta y el cacito a 27 g (pesado)', () => {
     const { menu, applied, changed } = applyMenuUpdates(saved, []);
     expect(changed).toBe(true);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id, BANANA_SHAKE_PALMIER_UPDATE.id, KRISPPER_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id, BANANA_SHAKE_PALMIER_UPDATE.id, KRISPPER_UPDATE.id, HAKE_UPDATE.id]);
     const protein = menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')!;
     expect(protein).toEqual({ id: 'proteina-soja-hsn', name: 'Proteína de soja', kcal100: 389, protein100: 92, measure: { name: 'cacito', grams: 27 } });
     expect(menu.ingredients.find((i) => i.id === 'avena')?.measure?.grams).toBe(20);
@@ -55,7 +55,7 @@ describe('applyMenuUpdates', () => {
 
   it('solo aplica lo que falta', () => {
     const { menu, applied } = applyMenuUpdates(SOY_MILK_UPDATE.apply(saved), [SOY_MILK_UPDATE.id]);
-    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id, BANANA_SHAKE_PALMIER_UPDATE.id, KRISPPER_UPDATE.id]);
+    expect(applied).toEqual([SOY_MILK_UPDATE.id, PROTEIN_ISOLATE_UPDATE.id, LENTILS_UPDATE.id, PROTEIN_SCOOP_UPDATE.id, WINGS_UPDATE.id, STEW_TOAST_SANDWICH_UPDATE.id, BANANA_SHAKE_PALMIER_UPDATE.id, KRISPPER_UPDATE.id, HAKE_UPDATE.id]);
     expect(menu.ingredients.find((i) => i.id === 'proteina-soja-hsn')?.measure?.grams).toBe(27);
   });
 
@@ -128,5 +128,13 @@ describe('applyMenuUpdates', () => {
     expect(ham).toEqual(expect.objectContaining({ portionG: 36, kcal: 86, proteinG: 11, side: true }));
     expect(sticks).toEqual(expect.objectContaining({ portionG: 34, kcal: 136, proteinG: 4, side: true }));
     expect(KRISPPER_UPDATE.apply(menu)).toEqual(menu);
+  });
+
+  it('añade la merluza con papas', () => {
+    const menu = HAKE_UPDATE.apply({ ingredients: [], dishes: [] });
+    const hake = toMealIdea(menu.dishes[0], menu.ingredients);
+    // 379 g a 75 kcal y 7 g de proteína por 100 g.
+    expect(hake).toEqual(expect.objectContaining({ name: 'Merluza con papas', slot: 'comida', portionG: 379, kcal: 284, proteinG: 27 }));
+    expect(HAKE_UPDATE.apply(menu)).toEqual(menu);
   });
 });

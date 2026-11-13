@@ -16,6 +16,7 @@ import {
   BROCCOLI_ID,
   HAM_ID,
   BREADSTICKS_ID,
+  HAKE_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -236,6 +237,22 @@ export const KRISPPER_UPDATE: MenuUpdate = {
   },
 };
 
+/** Noviembre 2026: se añade la merluza con papas. */
+export const HAKE_UPDATE: MenuUpdate = {
+  id: '2026-11-merluza-con-papas',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    if (!ingredients.some((i) => i.id === HAKE_ID)) {
+      ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === HAKE_ID)!));
+    }
+    if (!dishes.some((d) => d.id === HAKE_ID)) {
+      dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === HAKE_ID)!));
+    }
+    return { ingredients, dishes };
+  },
+};
+
 export const MENU_UPDATES: MenuUpdate[] = [
   SOY_MILK_UPDATE,
   PROTEIN_ISOLATE_UPDATE,
@@ -245,6 +262,7 @@ export const MENU_UPDATES: MenuUpdate[] = [
   STEW_TOAST_SANDWICH_UPDATE,
   BANANA_SHAKE_PALMIER_UPDATE,
   KRISPPER_UPDATE,
+  HAKE_UPDATE,
 ];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
