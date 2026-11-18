@@ -19,6 +19,7 @@ import {
   HAKE_ID,
   OAT_BANANA_SHAKE_ID,
   PEANUT_MMS_ID,
+  PLUMS_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -301,6 +302,22 @@ export const PEANUT_MMS_LABEL_UPDATE: MenuUpdate = {
   },
 };
 
+/** Noviembre 2026: se añaden las ciruelas. */
+export const PLUMS_UPDATE: MenuUpdate = {
+  id: '2026-11-ciruelas',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    if (!ingredients.some((i) => i.id === PLUMS_ID)) {
+      ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === PLUMS_ID)!));
+    }
+    if (!dishes.some((d) => d.id === PLUMS_ID)) {
+      dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === PLUMS_ID)!));
+    }
+    return { ingredients, dishes };
+  },
+};
+
 export const MENU_UPDATES: MenuUpdate[] = [
   SOY_MILK_UPDATE,
   PROTEIN_ISOLATE_UPDATE,
@@ -314,6 +331,7 @@ export const MENU_UPDATES: MenuUpdate[] = [
   OAT_BANANA_SHAKE_UPDATE,
   PEANUT_MMS_UPDATE,
   PEANUT_MMS_LABEL_UPDATE,
+  PLUMS_UPDATE,
 ];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */

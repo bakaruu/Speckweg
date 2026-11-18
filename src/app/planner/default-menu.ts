@@ -18,6 +18,7 @@ export const BREADSTICKS_ID = 'palitos-pan-integral';
 export const HAKE_ID = 'merluza-con-papas';
 export const OAT_BANANA_SHAKE_ID = 'batido-platano-avena';
 export const PEANUT_MMS_ID = 'mms-cacahuete';
+export const PLUMS_ID = 'ciruelas';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -78,6 +79,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   { id: CHOCOLATE_PALMIER_ID, name: 'Palmera de chocolate', kcal100: 530, protein100: 6, measure: { name: 'unidad', grams: 90 } },
   // M&M's de cacahuete, según la etiqueta: 524 kcal y 9,7 g de proteína por 100 g.
   { id: PEANUT_MMS_ID, name: "M&M's de cacahuete", kcal100: 524, protein100: 9.7, measure: { name: 'puñado', grams: 22 } },
+  // Ciruelas rojas pesadas con hueso (~5 % de hueso): unas 44 kcal y 0,7 g de proteína por 100 g.
+  { id: PLUMS_ID, name: 'Ciruelas (con hueso)', kcal100: 44, protein100: 0.7, measure: { name: 'unidad', grams: 98 } },
   // Merluza guisada con patata y guisantes, caldosa: unas 75 kcal y 7 g de proteína por 100 g.
   { id: HAKE_ID, name: 'Merluza con papas', kcal100: 75, protein100: 7, measure: { name: 'plato', grams: 379 } },
 ];
@@ -117,6 +120,7 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: OAT_BANANA_SHAKE_ID, slot: 'desayuno', name: 'Batido con plátano y avena', portion: '1 vaso de batidora (471 g)', usual: true, lines: [g(SOY_MILK_ID, 300), m('proteina-soja-hsn', 1.5), g('avena', 50), g('platano', 80)] },
   { id: CHOCOLATE_PALMIER_ID, slot: 'merienda', name: 'Palmera de chocolate', portion: '1 palmera', side: true, lines: [m(CHOCOLATE_PALMIER_ID)] },
   { id: PEANUT_MMS_ID, slot: 'merienda', name: "M&M's de cacahuete", portion: '1 puñado (22 g)', side: true, lines: [m(PEANUT_MMS_ID)] },
+  { id: PLUMS_ID, slot: 'comida', name: 'Ciruelas', portion: '2 ciruelas (195 g con hueso)', notes: 'De postre', side: true, lines: [g(PLUMS_ID, 195)] },
   { id: 'yogur-frutos-secos', slot: 'merienda', name: 'Yogur con un puñado de frutos secos', portion: '1 yogur + 1 puñado', lines: [m('yogur'), m('frutos-secos')] },
   { id: 'bocadillo-pavo', slot: 'merienda', name: 'Bocadillo pequeño de pavo y queso', portion: '1 bocadillo pequeño', lines: [m('pan', 2), m('pavo', 3), m('queso')] },
   { id: 'tostada-tomate-atun', slot: 'merienda', name: 'Tostada con tomate y atún', portion: '1 tostada', lines: [m('pan'), m('tomate', 2), m('atun')] },
