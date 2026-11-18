@@ -100,6 +100,13 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
     date: '2026-11-18',
     items: [{ mealId: PEANUT_MMS_ID, grams: 22 }],
   },
+  {
+    // Los M&M's se apuntaron con valores típicos: se vuelven a apuntar con los de la etiqueta y se quita el viejo.
+    id: '2026-11-18-mms-etiqueta',
+    date: '2026-11-18',
+    items: [{ mealId: PEANUT_MMS_ID, grams: 22 }],
+    remove: [{ name: "M&M's de cacahuete", grams: 22 }],
+  },
 ];
 
 /** Lo que falta por apuntar: cada comida con su plato del menú y sus gramos. */
