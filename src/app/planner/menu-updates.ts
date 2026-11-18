@@ -18,6 +18,7 @@ import {
   BREADSTICKS_ID,
   HAKE_ID,
   OAT_BANANA_SHAKE_ID,
+  PEANUT_MMS_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -272,6 +273,22 @@ export const OAT_BANANA_SHAKE_UPDATE: MenuUpdate = {
   },
 };
 
+/** Noviembre 2026: se añaden los M&M's de cacahuete. */
+export const PEANUT_MMS_UPDATE: MenuUpdate = {
+  id: '2026-11-mms-cacahuete',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    if (!ingredients.some((i) => i.id === PEANUT_MMS_ID)) {
+      ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === PEANUT_MMS_ID)!));
+    }
+    if (!dishes.some((d) => d.id === PEANUT_MMS_ID)) {
+      dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === PEANUT_MMS_ID)!));
+    }
+    return { ingredients, dishes };
+  },
+};
+
 export const MENU_UPDATES: MenuUpdate[] = [
   SOY_MILK_UPDATE,
   PROTEIN_ISOLATE_UPDATE,
@@ -283,6 +300,7 @@ export const MENU_UPDATES: MenuUpdate[] = [
   KRISPPER_UPDATE,
   HAKE_UPDATE,
   OAT_BANANA_SHAKE_UPDATE,
+  PEANUT_MMS_UPDATE,
 ];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
