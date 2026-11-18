@@ -75,6 +75,12 @@ describe('pendingDiaryUpdates', () => {
     expect(macrosFor(day.items[0].meal, 379)).toEqual({ kcal: 284, proteinG: 27 });
   });
 
+  it('apunta el batido con plátano y avena del 18 de noviembre', () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-11-18-batido')!;
+    expect(day.items.map((i) => [i.meal.name, i.meal.slot, i.grams])).toEqual([['Batido con plátano y avena', 'desayuno', 471]]);
+    expect(macrosFor(day.items[0].meal, 471)).toEqual({ kcal: 512, proteinG: 54 });
+  });
+
   it('no repite lo ya apuntado', () => {
     expect(pendingDiaryUpdates(DIARY_UPDATES.map((u) => u.id), MEAL_CATALOG)).toEqual([]);
   });
