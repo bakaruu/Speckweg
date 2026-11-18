@@ -1,4 +1,4 @@
-import { BANANA_SHAKE_ID, BREADSTICKS_ID, HAKE_ID, BROCCOLI_ID, HAM_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
+import { BANANA_SHAKE_ID, BREADSTICKS_ID, HAKE_ID, OAT_BANANA_SHAKE_ID, BROCCOLI_ID, HAM_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -86,6 +86,13 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
     id: '2026-11-13-comida',
     date: '2026-11-13',
     items: [{ mealId: HAKE_ID, grams: 379 }],
+  },
+  {
+    // Batido entero: 300 ml de leche de soja, 1,5 cacitos de proteína, 50 g de avena y un plátano (~80 g).
+    // En la báscula dio 577 g con el vaso de batidora (153 g), 424 g netos; se apunta por ingredientes.
+    id: '2026-11-18-batido',
+    date: '2026-11-18',
+    items: [{ mealId: OAT_BANANA_SHAKE_ID, grams: 471 }],
   },
 ];
 

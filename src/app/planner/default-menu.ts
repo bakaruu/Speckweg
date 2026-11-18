@@ -16,6 +16,7 @@ export const BROCCOLI_ID = 'brocoli-solo';
 export const HAM_ID = 'jamon-solo';
 export const BREADSTICKS_ID = 'palitos-pan-integral';
 export const HAKE_ID = 'merluza-con-papas';
+export const OAT_BANANA_SHAKE_ID = 'batido-platano-avena';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -110,6 +111,7 @@ export const DEFAULT_DISHES: Dish[] = [
   { id: POST_WORKOUT_SHAKE_ID, slot: 'merienda', name: 'Batido post-entreno', portion: '1 vaso grande', usual: true, lines: [g(SOY_MILK_ID, 300), m('proteina-soja-hsn', 1.5), m('avena', 1.5)] },
   // El de Aru: 572 g en la báscula menos los 153 g del vaso de la batidora son 419 g, así que el plátano pelado eran unos 79 g.
   { id: BANANA_SHAKE_ID, slot: 'merienda', name: 'Batido de proteína de soja con plátano', portion: '1 vaso de batidora (419 g)', usual: true, lines: [g(SOY_MILK_ID, 300), m('proteina-soja-hsn', 1.5), g('platano', 79)] },
+  { id: OAT_BANANA_SHAKE_ID, slot: 'desayuno', name: 'Batido con plátano y avena', portion: '1 vaso de batidora (471 g)', usual: true, lines: [g(SOY_MILK_ID, 300), m('proteina-soja-hsn', 1.5), g('avena', 50), g('platano', 80)] },
   { id: CHOCOLATE_PALMIER_ID, slot: 'merienda', name: 'Palmera de chocolate', portion: '1 palmera', side: true, lines: [m(CHOCOLATE_PALMIER_ID)] },
   { id: 'yogur-frutos-secos', slot: 'merienda', name: 'Yogur con un puñado de frutos secos', portion: '1 yogur + 1 puñado', lines: [m('yogur'), m('frutos-secos')] },
   { id: 'bocadillo-pavo', slot: 'merienda', name: 'Bocadillo pequeño de pavo y queso', portion: '1 bocadillo pequeño', lines: [m('pan', 2), m('pavo', 3), m('queso')] },

@@ -17,6 +17,7 @@ import {
   HAM_ID,
   BREADSTICKS_ID,
   HAKE_ID,
+  OAT_BANANA_SHAKE_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -253,6 +254,24 @@ export const HAKE_UPDATE: MenuUpdate = {
   },
 };
 
+/** Noviembre 2026: se añade el batido con plátano y avena. */
+export const OAT_BANANA_SHAKE_UPDATE: MenuUpdate = {
+  id: '2026-11-batido-platano-avena',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    for (const id of [SOY_MILK_ID, 'proteina-soja-hsn', 'avena', 'platano']) {
+      if (!ingredients.some((i) => i.id === id)) {
+        ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === id)!));
+      }
+    }
+    if (!dishes.some((d) => d.id === OAT_BANANA_SHAKE_ID)) {
+      dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === OAT_BANANA_SHAKE_ID)!));
+    }
+    return { ingredients, dishes };
+  },
+};
+
 export const MENU_UPDATES: MenuUpdate[] = [
   SOY_MILK_UPDATE,
   PROTEIN_ISOLATE_UPDATE,
@@ -263,6 +282,7 @@ export const MENU_UPDATES: MenuUpdate[] = [
   BANANA_SHAKE_PALMIER_UPDATE,
   KRISPPER_UPDATE,
   HAKE_UPDATE,
+  OAT_BANANA_SHAKE_UPDATE,
 ];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
