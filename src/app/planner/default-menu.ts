@@ -76,8 +76,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   // Palitos de pan integrales tipo picos o grissini, valores típicos: unas 400 kcal y 12 g de proteína por 100 g.
   { id: BREADSTICKS_ID, name: 'Palitos de pan integrales', kcal100: 400, protein100: 12, measure: { name: 'puñado', grams: 34 } },
   { id: CHOCOLATE_PALMIER_ID, name: 'Palmera de chocolate', kcal100: 530, protein100: 6, measure: { name: 'unidad', grams: 90 } },
-  // M&M's de cacahuete: unas 515 kcal y 9,5 g de proteína por 100 g.
-  { id: PEANUT_MMS_ID, name: "M&M's de cacahuete", kcal100: 515, protein100: 9.5, measure: { name: 'puñado', grams: 22 } },
+  // M&M's de cacahuete, según la etiqueta: 524 kcal y 9,7 g de proteína por 100 g.
+  { id: PEANUT_MMS_ID, name: "M&M's de cacahuete", kcal100: 524, protein100: 9.7, measure: { name: 'puñado', grams: 22 } },
   // Merluza guisada con patata y guisantes, caldosa: unas 75 kcal y 7 g de proteína por 100 g.
   { id: HAKE_ID, name: 'Merluza con papas', kcal100: 75, protein100: 7, measure: { name: 'plato', grams: 379 } },
 ];

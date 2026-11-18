@@ -289,6 +289,18 @@ export const PEANUT_MMS_UPDATE: MenuUpdate = {
   },
 };
 
+/** Noviembre 2026: los M&M's de cacahuete pasan a los valores de la etiqueta. */
+export const PEANUT_MMS_LABEL_UPDATE: MenuUpdate = {
+  id: '2026-11-mms-etiqueta',
+  apply(menu: Menu): Menu {
+    const label = DEFAULT_INGREDIENTS.find((i) => i.id === PEANUT_MMS_ID)!;
+    const ingredients = menu.ingredients.map((i) =>
+      i.id === PEANUT_MMS_ID ? { ...structuredClone(i), kcal100: label.kcal100, protein100: label.protein100 } : structuredClone(i),
+    );
+    return { ingredients, dishes: structuredClone(menu.dishes) };
+  },
+};
+
 export const MENU_UPDATES: MenuUpdate[] = [
   SOY_MILK_UPDATE,
   PROTEIN_ISOLATE_UPDATE,
@@ -301,6 +313,7 @@ export const MENU_UPDATES: MenuUpdate[] = [
   HAKE_UPDATE,
   OAT_BANANA_SHAKE_UPDATE,
   PEANUT_MMS_UPDATE,
+  PEANUT_MMS_LABEL_UPDATE,
 ];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */

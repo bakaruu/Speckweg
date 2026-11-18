@@ -84,7 +84,13 @@ describe('pendingDiaryUpdates', () => {
   it("apunta los M&M's de cacahuete del 18 de noviembre", () => {
     const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-11-18-mms')!;
     expect(day.items.map((i) => [i.meal.name, i.grams])).toEqual([["M&M's de cacahuete", 22]]);
-    expect(macrosFor(day.items[0].meal, 22)).toEqual({ kcal: 113, proteinG: 2 });
+    expect(macrosFor(day.items[0].meal, 22)).toEqual({ kcal: 115, proteinG: 2 });
+  });
+
+  it("corrige los M&M's del 18 de noviembre con la etiqueta", () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-11-18-mms-etiqueta')!;
+    expect(day.items.map((i) => [i.meal.name, i.grams])).toEqual([["M&M's de cacahuete", 22]]);
+    expect(day.remove).toEqual([{ name: "M&M's de cacahuete", grams: 22 }]);
   });
 
   it('no repite lo ya apuntado', () => {
