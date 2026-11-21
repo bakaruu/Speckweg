@@ -1,4 +1,4 @@
-import { BANANA_SHAKE_ID, BREADSTICKS_ID, HAKE_ID, OAT_BANANA_SHAKE_ID, PEANUT_MMS_ID, PLUMS_ID, BROCCOLI_ID, HAM_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
+import { BANANA_SHAKE_ID, BREADSTICKS_ID, HAKE_ID, OAT_BANANA_SHAKE_ID, PEANUT_MMS_ID, PLUMS_ID, CURRY_CHICKEN_ID, BROCCOLI_ID, HAM_ID, CHOCOLATE_PALMIER_ID, KRISPPER_ID, LENTILS_ID, MEAT_SANDWICH_ID, PEANUT_TOAST_ID, PICKLES_ID, ROLLS_ID, STEW_ID, WINGS_ID } from './default-menu';
 import { MealIdea } from './meal-catalog';
 
 /**
@@ -112,6 +112,12 @@ export const DIARY_UPDATES: DiaryUpdate[] = [
     id: '2026-11-18-ciruelas',
     date: '2026-11-18',
     items: [{ mealId: PLUMS_ID, grams: 195 }],
+  },
+  {
+    // Pollo al curry con nata y patatas: 538 g en la báscula menos los 24 g del táper de plástico.
+    id: '2026-11-21-comida',
+    date: '2026-11-21',
+    items: [{ mealId: CURRY_CHICKEN_ID, grams: 514 }],
   },
 ];
 

@@ -20,6 +20,7 @@ import {
   OAT_BANANA_SHAKE_ID,
   PEANUT_MMS_ID,
   PLUMS_ID,
+  CURRY_CHICKEN_ID,
 } from './default-menu';
 import { Ingredient, Menu } from './menu-model';
 
@@ -318,6 +319,22 @@ export const PLUMS_UPDATE: MenuUpdate = {
   },
 };
 
+/** Noviembre 2026: se añade el pollo al curry con nata y patatas. */
+export const CURRY_CHICKEN_UPDATE: MenuUpdate = {
+  id: '2026-11-pollo-curry',
+  apply(menu: Menu): Menu {
+    const ingredients = structuredClone(menu.ingredients);
+    const dishes = structuredClone(menu.dishes);
+    if (!ingredients.some((i) => i.id === CURRY_CHICKEN_ID)) {
+      ingredients.push(structuredClone(DEFAULT_INGREDIENTS.find((i) => i.id === CURRY_CHICKEN_ID)!));
+    }
+    if (!dishes.some((d) => d.id === CURRY_CHICKEN_ID)) {
+      dishes.push(structuredClone(DEFAULT_DISHES.find((d) => d.id === CURRY_CHICKEN_ID)!));
+    }
+    return { ingredients, dishes };
+  },
+};
+
 export const MENU_UPDATES: MenuUpdate[] = [
   SOY_MILK_UPDATE,
   PROTEIN_ISOLATE_UPDATE,
@@ -332,6 +349,7 @@ export const MENU_UPDATES: MenuUpdate[] = [
   PEANUT_MMS_UPDATE,
   PEANUT_MMS_LABEL_UPDATE,
   PLUMS_UPDATE,
+  CURRY_CHICKEN_UPDATE,
 ];
 
 /** Aplica los cambios pendientes. Devuelve el menú y la lista de cambios ya aplicados. */
