@@ -19,6 +19,7 @@ export const HAKE_ID = 'merluza-con-papas';
 export const OAT_BANANA_SHAKE_ID = 'batido-platano-avena';
 export const PEANUT_MMS_ID = 'mms-cacahuete';
 export const PLUMS_ID = 'ciruelas';
+export const CURRY_CHICKEN_ID = 'pollo-curry-nata-patatas';
 
 /**
  * Menú inicial. Desde la pantalla Menú se puede cambiar todo: ingredientes, medidas caseras y platos.
@@ -83,6 +84,8 @@ export const DEFAULT_INGREDIENTS: Ingredient[] = [
   { id: PLUMS_ID, name: 'Ciruelas (con hueso)', kcal100: 44, protein100: 0.7, measure: { name: 'unidad', grams: 98 } },
   // Merluza guisada con patata y guisantes, caldosa: unas 75 kcal y 7 g de proteína por 100 g.
   { id: HAKE_ID, name: 'Merluza con papas', kcal100: 75, protein100: 7, measure: { name: 'plato', grams: 379 } },
+  // Pollo al curry con nata y patatas: unas 130 kcal y 10 g de proteína por 100 g.
+  { id: CURRY_CHICKEN_ID, name: 'Pollo al curry con nata y patatas', kcal100: 130, protein100: 10, measure: { name: 'plato', grams: 514 } },
 ];
 
 const m = (ingredientId: string, amount = 1): DishLine => ({ ingredientId, amount, unit: 'medida' });
@@ -128,6 +131,7 @@ export const DEFAULT_DISHES: Dish[] = [
 
   // Cenas
   { id: HAKE_ID, slot: 'comida', name: 'Merluza con papas', portion: '1 plato (379 g)', notes: 'Merluza guisada con patata y guisantes, caldosa', usual: true, lines: [m(HAKE_ID)] },
+  { id: CURRY_CHICKEN_ID, slot: 'comida', name: 'Pollo al curry con nata y patatas', portion: '1 táper (514 g)', notes: 'Pollo con patatas en salsa de nata y curry', usual: true, lines: [m(CURRY_CHICKEN_ID)] },
   { id: KRISPPER_ID, slot: 'cena', name: 'Chicken Krispper de Burger King', portion: '1 hamburguesa (304 g)', side: true, lines: [m(KRISPPER_ID)] },
   { id: BROCCOLI_ID, slot: 'cena', name: 'Brócoli al horno o airfryer', portion: '1 plato (163 g)', side: true, lines: [g('brocoli', 163)] },
   { id: HAM_ID, slot: 'cena', name: 'Jamón serrano', portion: '1 plato pequeño (36 g)', side: true, lines: [g('jamon', 36)] },

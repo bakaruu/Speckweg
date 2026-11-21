@@ -99,6 +99,12 @@ describe('pendingDiaryUpdates', () => {
     expect(macrosFor(day.items[0].meal, 195)).toEqual({ kcal: 86, proteinG: 1 });
   });
 
+  it('apunta el pollo al curry del 21 de noviembre', () => {
+    const day = pendingDiaryUpdates([], MEAL_CATALOG).find((u) => u.id === '2026-11-21-comida')!;
+    expect(day.items.map((i) => [i.meal.name, i.meal.slot, i.grams])).toEqual([['Pollo al curry con nata y patatas', 'comida', 514]]);
+    expect(macrosFor(day.items[0].meal, 514)).toEqual({ kcal: 668, proteinG: 51 });
+  });
+
   it('no repite lo ya apuntado', () => {
     expect(pendingDiaryUpdates(DIARY_UPDATES.map((u) => u.id), MEAL_CATALOG)).toEqual([]);
   });
